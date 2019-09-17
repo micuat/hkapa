@@ -29,10 +29,10 @@ void draw() {
   surface.moveMeshPointBy(CornerPinSurface.TL, -4, -13);
 
   surface.moveMeshPointBy(CornerPinSurface.TR, -sw, 0);
-  surface.moveMeshPointBy(CornerPinSurface.TR, 1741, 2);
+  surface.moveMeshPointBy(CornerPinSurface.TR, 1746, 2);
 
   surface.moveMeshPointBy(CornerPinSurface.BR, -sw, -sh);
-  surface.moveMeshPointBy(CornerPinSurface.BR, 1739, 548);
+  surface.moveMeshPointBy(CornerPinSurface.BR, 1743, 548);
 
   surface.moveMeshPointBy(CornerPinSurface.BL, 0, -sh);
   surface.moveMeshPointBy(CornerPinSurface.BL, -3, 677);
@@ -46,6 +46,7 @@ void draw() {
 
   background(0);
 
+  translate(0, 44);
   surface.render(img);
   filter(cutoff);
 }

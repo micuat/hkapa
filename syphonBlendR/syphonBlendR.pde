@@ -26,10 +26,10 @@ void draw() {
   int sh = 600;
   surface = ks.createCornerPinSurface(sw, sh, 20);
   surface.moveMeshPointBy(CornerPinSurface.TL, 0, 0);
-  surface.moveMeshPointBy(CornerPinSurface.TL, -575, 5);
+  surface.moveMeshPointBy(CornerPinSurface.TL, -598, 1);
 
   surface.moveMeshPointBy(CornerPinSurface.TR, -sw, 0);
-  surface.moveMeshPointBy(CornerPinSurface.TR, 1114, 22);
+  surface.moveMeshPointBy(CornerPinSurface.TR, 1137, 22);
 
   surface.moveMeshPointBy(CornerPinSurface.BR, -sw, -sh);
   surface.moveMeshPointBy(CornerPinSurface.BR, 1145, 664);
@@ -46,6 +46,7 @@ void draw() {
 
   background(0);
 
+  translate(0, 44);
   surface.render(img);
   filter(cutoff);
 }
