@@ -32,6 +32,10 @@ import org.openkinect.freenect.*;
 import org.openkinect.freenect2.*;
 import org.openkinect.processing.*;
 
+import codeanticode.syphon.*;
+
+SyphonServer server;
+
 Kinect2 kinect2;
 
   //
@@ -233,6 +237,8 @@ Kinect2 kinect2;
     opticalflow = new DwOpticalFlow(context, pg_movie_w, pg_movie_h);
     opticalflow.param.display_mode = 1;
     
+    server = new SyphonServer(this, "Processing Syphon");
+
     // fluid object
     fluid = new DwFluid2D(context, pg_movie_w, pg_movie_h, fluidgrid_scale);
     // initial fluid parameters
@@ -356,6 +362,7 @@ Kinect2 kinect2;
     // display result
     background(0);
     image(pg_oflow, 0, 0);
+    server.sendScreen();
     
     //timeline.draw(mouseX, mouseY);
     
