@@ -22,8 +22,12 @@ void setup() {
 }
 
 void draw() {
-  int sw = 1600;
-  int sh = 550;
+  if (client.newFrame()) {
+    img = client.getImage(img); // load the pixels array with the updated image info (slow)
+  }
+
+  int sw = img.width;
+  int sh = img.height;
   surface = ks.createCornerPinSurface(sw, sh, 20);
   surface.moveMeshPointBy(CornerPinSurface.TL, 0, 0);
   surface.moveMeshPointBy(CornerPinSurface.TL, -4, 10);
@@ -37,13 +41,6 @@ void draw() {
   surface.moveMeshPointBy(CornerPinSurface.BL, 0, -sh);
   surface.moveMeshPointBy(CornerPinSurface.BL, -3, 684);
   
-  if (client.newFrame()) {
-    img = client.getImage(img); // load the pixels array with the updated image info (slow)
-  }
-  if (img != null) {
-    image(img, 0, 0, width, height);
-  }
-
   background(0);
 
   translate(0, 44);
