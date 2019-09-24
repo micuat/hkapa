@@ -1,4 +1,4 @@
-/**
+ /**
  * Getting Started with Capture.
  * 
  * Reading and displaying an image from an attached Capture device. 
@@ -28,7 +28,7 @@ void setup() {
 
     // The camera can be initialized directly using an element
     // from the array returned by list():
-    cam = new Capture(this, cameras[0]);
+    cam = new Capture(this, cameras[3]);
     // Or, the settings can be defined based on the text in the list
     //cam = new Capture(this, 640, 480, "Built-in iSight", 30);
     
@@ -42,8 +42,11 @@ void draw() {
     cam.read();
   }
   background(0);
-  int w = 100;
-  int h = -50;
+  translate(width/2, height/2);
+  //scale(-1, 1);
+  translate(-width/2, -height/2);
+  int w = 205;
+  int h = -44;
   image(cam, w, h, width-w*2, height-h*2);
   server.sendScreen();
   // The following does the same as the above image() line, but 

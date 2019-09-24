@@ -24,28 +24,28 @@ void setup() {
 void draw() {
   if (client.newFrame()) {
     img = client.getImage(img); // load the pixels array with the updated image info (slow)
+    int sw = img.width;
+    int sh = img.height;
+    float mult = 1920.0 / 1280.0;
+    surface = ks.createCornerPinSurface(sw, sh, 20);
+    surface.moveMeshPointBy(CornerPinSurface.TL, 0, 0);
+    surface.moveMeshPointBy(CornerPinSurface.TL, -4*mult, 10*mult);
+
+    surface.moveMeshPointBy(CornerPinSurface.TR, -sw, 0);
+    surface.moveMeshPointBy(CornerPinSurface.TR, 1778*mult, -12*mult);
+
+    surface.moveMeshPointBy(CornerPinSurface.BR, -sw, -sh);
+    surface.moveMeshPointBy(CornerPinSurface.BR, 1773*mult, 544*mult);
+
+    surface.moveMeshPointBy(CornerPinSurface.BL, 0, -sh);
+    surface.moveMeshPointBy(CornerPinSurface.BL, -3*mult, 684*mult);
+
+    background(0);
+
+    translate(0, 44);
+    surface.render(img);
+    filter(cutoff);
   }
-
-  int sw = img.width;
-  int sh = img.height;
-  surface = ks.createCornerPinSurface(sw, sh, 20);
-  surface.moveMeshPointBy(CornerPinSurface.TL, 0, 0);
-  surface.moveMeshPointBy(CornerPinSurface.TL, -4, 10);
-
-  surface.moveMeshPointBy(CornerPinSurface.TR, -sw, 0);
-  surface.moveMeshPointBy(CornerPinSurface.TR, 1778, -12);
-
-  surface.moveMeshPointBy(CornerPinSurface.BR, -sw, -sh);
-  surface.moveMeshPointBy(CornerPinSurface.BR, 1773, 544);
-
-  surface.moveMeshPointBy(CornerPinSurface.BL, 0, -sh);
-  surface.moveMeshPointBy(CornerPinSurface.BL, -3, 684);
-  
-  background(0);
-
-  translate(0, 44);
-  surface.render(img);
-  filter(cutoff);
 }
 
 void keyPressed() {
