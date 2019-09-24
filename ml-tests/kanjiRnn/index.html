@@ -264,7 +264,7 @@ var sketch = function( p ) {
   var model_loaded = false;
   var model;
   var model_data;
-  var temperature = 0.25;
+  var temperature = 0.01//0.25;
   var refresh_count = 1;
 
   var modelPdf; // store all the parameters of a mixture-density distribution
@@ -699,6 +699,7 @@ var sketch = function( p ) {
   }
 
   p.setup = function() {
+    temperature_slider = p.createSlider(0, 100, 10);
     init(function(){
       console.log('ready.');
       // draw_random_example();
@@ -731,6 +732,8 @@ var sketch = function( p ) {
   }
 
   p.draw = function() {
+    // temperature = temperature_slider.value()/100;
+
     screen_width = get_window_width(); //
     screen_height = get_window_height(); //
 
