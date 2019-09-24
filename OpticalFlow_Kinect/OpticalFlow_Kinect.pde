@@ -37,6 +37,7 @@ import codeanticode.syphon.*;
 SyphonServer server;
 
 Kinect2 kinect2;
+PImage depthImg;
 
   //
   // This Demo-App combines Optical Flow (based on Movie frames) and Fluid 
@@ -220,13 +221,14 @@ Kinect2 kinect2;
   
   
   public void settings() {
-    size(view_w, view_h, P2D);
+    //size(view_w, view_h, P2D);
+    fullScreen(P2D, 2);
     smooth(8);
   }
 
   public void setup() {
     
-    surface.setLocation(view_x, view_y);
+    //surface.setLocation(view_x, view_y);
     
     // main library context
     context = new DwPixelFlow(this);
@@ -269,6 +271,7 @@ Kinect2 kinect2;
   kinect2.initRegistered();
   // Start all data
   kinect2.initDevice();
+  depthImg = new PImage(kinect2.depthWidth, kinect2.depthHeight);
 
     // movie file is not contained in the library release
     // to keep the file size small. please use one of your own videos instead.
@@ -293,8 +296,32 @@ Kinect2 kinect2;
 
   public void draw() {
     
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(-1, 1);
+    translate(-width/2, -height/2);
     if( 1==1){
       //movie.read();
+      
+        // Threshold the depth image
+        int minDepth =  0;
+        int maxDepth =  1200; //4.5m
+        int[] rawDepth = kinect2.getRawDepth();
+        
+        
+        for (int i=0; i < rawDepth.length; i++) {
+          if (rawDepth[i] >= minDepth && rawDepth[i] <= maxDepth) {
+            depthImg.pixels[i] = color(0);
+          } else {
+            depthImg.pixels[i] = color(255);
+          }
+        }
+        
+      
+        // Draw the thresholded image
+        depthImg.updatePixels();
+        //image(depthImg, kinect2.depthWidth, 0);
+
       
       // compute movie display size to fit the best
       int movie_w = kinect2.getDepthImage().width;
@@ -315,7 +342,13 @@ Kinect2 kinect2;
       pg_movie.pushMatrix();
       pg_movie.translate(pg_movie_w/2f, pg_movie_h/2f);
       pg_movie.scale(0.95f);
-      pg_movie.image(kinect2.getRegisteredImage(), 0, 0, mov_w_fit, mov_h_fit);
+  int w = 205;
+  int h = -94;
+  int x = 0;
+  int y = 241;
+  pg_movie.image(depthImg, w+x, h+y, width-w*2, height-h*2);
+      //pg_movie.image(depthImg, 0, 0, mov_w_fit, mov_h_fit);
+      //pg_movie.image(kinect2.getRegisteredImage(), 0, 0, mov_w_fit, mov_h_fit);
       pg_movie.popMatrix();
       pg_movie.endDraw();
       
@@ -362,6 +395,7 @@ Kinect2 kinect2;
     // display result
     background(0);
     image(pg_oflow, 0, 0);
+    popMatrix();
     server.sendScreen();
     
     //timeline.draw(mouseX, mouseY);
