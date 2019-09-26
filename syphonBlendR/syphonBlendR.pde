@@ -14,7 +14,7 @@ void setup() {
   // Keystone will only work with P3D or OPENGL renderers, 
   // since it relies on texture mapping to deform
   //size(1280, 720, P3D);
-  fullScreen(P3D, 1);
+  fullScreen(P3D, 3);
   client = new SyphonClient(this);
 
   ks = new Keystone(this);
