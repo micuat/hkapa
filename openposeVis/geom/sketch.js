@@ -7,6 +7,8 @@ var s = function (p) {
     [5, 12],
     [9, 10],
     [12, 13],
+    [10, 11],
+    [13, 14],
     ];
 
     let smoothedPoses = [];
@@ -88,8 +90,14 @@ var s = function (p) {
             if (minIndex >= 0) {
                 let pose = people[minIndex].pose;
                 smoothedPoses[i].disappearCount = 0;
+                smoothedPoses[i].bornCount++;
                 people[minIndex].taken = true;
-                p.text(" " + i, sp[0].x, sp[0].y - 50);
+                p.text(i + "," + smoothedPoses[i].bornCount, sp[0].x, sp[0].y - 50);
+
+                p.pushStyle();
+                let fadeIn = Math.min(1, smoothedPoses[i].bornCount * 0.05);
+                p.stroke(255, fadeIn * 255);
+                p.fill(255, fadeIn * 255);
                 for (let j = 0; j < sp.length; j++) {
                     if (isNaN(sp[j].x) || isNaN(sp[j].y)) {
                         sp[j].x = pose[j].x;
@@ -104,8 +112,15 @@ var s = function (p) {
                 for (let j = 0; j < pairs.length; j++) {
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
-                    p.line(sp[i0].x, sp[i0].y, sp[i1].x, sp[i1].y);
+                    let x0 = sp[i0].x;
+                    let y0 = sp[i0].y;
+                    let x1 = sp[i1].x;
+                    let y1 = sp[i1].y;
+                    let x2 = p.lerp(x1, x0, 5);
+                    let y2 = p.lerp(y1, y0, 5);
+                    p.line(x2, y2, x1, y1);
                 }
+                p.popStyle();
             }
             else {
                 smoothedPoses[i].disappearCount++;
@@ -123,30 +138,20 @@ var s = function (p) {
                 if (smoothedPoses[j].disappearCount >= disappearMax) {
                     smoothedPoses[j].pose = pose;
                     smoothedPoses[j].disappearCount = 0;
+                    smoothedPoses[j].bornCount = 0;
+
                     sp = pose;
                     id = j;
                     break;
                 }
             }
             if (id < 0) {
-                smoothedPoses.push({ pose: pose, disappearCount: 0 })
+                smoothedPoses.push({ pose: pose, disappearCount: 0, bornCount: 0 })
                 sp = pose;
                 id = smoothedPoses.length - 1;
             }
 
         }
-        // for (let i = 0; i < people.length; i++) {
-        //     let pose = unpackPose(people[i].pose_keypoints_2d);
-        //     p.text(" " + i, pose[0].x, pose[0].y - 50);
-        //     for (let j = 0; j < pose.length; j++) {
-        //         p.ellipse(pose[j].x, pose[j].y, 5, 5);
-        //     }
-        //     for (let j = 0; j < pairs.length; j++) {
-        //         let i0 = pairs[j][0];
-        //         let i1 = pairs[j][1];
-        //         p.line(pose[i0].x, pose[i0].y, pose[i1].x, pose[i1].y);
-        //     }
-        // }
     }
 };
 
