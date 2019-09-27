@@ -10,6 +10,9 @@ var s = function (p) {
     [10, 11],
     [13, 14],
     ];
+    let flippedIndex = [0, 1, 5, 6, 7, 2, 3, 4,
+        8, 12, 13, 14, 9, 10, 11, 16, 15, 18, 17,
+        22, 23, 24, 19, 20, 21];
 
     let smoothedPoses = [];
 
@@ -30,9 +33,37 @@ var s = function (p) {
         }
         return joints;
     }
-    p.draw = function () {
-        p.background(0)
-        p.textSize(24)
+    let disappearMax = 15;
+
+    function poseDistance(args) {
+        let p0 = args.p0, p1 = args.p1, defaultError = args.defaultError, flipped = args.flipped;
+        let error = 0;
+        let validCount = 0;
+        for (let k = 0; k < p0.length; k++) {
+            let idx = k;
+            if (flipped !== undefined && flipped == true) {
+                idx = flippedIndex[k];
+            }
+            let x0 = p0[idx].x;
+            let y0 = p0[idx].y;
+            let x1 = p1[k].x;
+            let y1 = p1[k].y;
+            if (isNaN(x0) || isNaN(y0) || isNaN(x1) || isNaN(y1)) {
+            }
+            else {
+                error += p.dist(x0, y0, x1, y1);
+                validCount++;
+            }
+        }
+        if (validCount > 5) {
+            return error / validCount;
+        }
+        else {
+            return defaultError;
+        }
+    }
+
+    p.tracking = function () {
         let poses = JSON.parse("{" + p.jsonString + "}");
         if (poses.people == undefined) return;
         let peopleRaw = poses.people;
@@ -42,13 +73,11 @@ var s = function (p) {
         }
 
         let maxError = 100;
-        let disappearMax = 15;
         for (let i = 0; i < smoothedPoses.length; i++) {
             let sp = smoothedPoses[i].pose;
             if (smoothedPoses[i].disappearCount >= disappearMax) {
                 continue;
             }
-            let id = -1;
             let errors = [];
             // find errors
             for (let j = 0; j < people.length; j++) {
@@ -57,26 +86,8 @@ var s = function (p) {
                     errors.push(maxError);
                     continue;
                 }
-                let error = 0;
-                let validCount = 0;
-                for (let k = 0; k < pose.length; k++) {
-                    let x0 = pose[k].x;
-                    let y0 = pose[k].y;
-                    let x1 = sp[k].x;
-                    let y1 = sp[k].y;
-                    if (isNaN(x0) || isNaN(y0) || isNaN(x1) || isNaN(y1)) {
-                    }
-                    else {
-                        error += p.dist(x0, y0, x1, y1);
-                        validCount++;
-                    }
-                }
-                if (validCount > 5) {
-                    errors.push(error / validCount);
-                }
-                else {
-                    errors.push(maxError);
-                }
+
+                errors.push(poseDistance({ p0: pose, p1: sp, defaultError: maxError }));
             }
 
             let minIndex = -1;
@@ -92,35 +103,29 @@ var s = function (p) {
                 smoothedPoses[i].disappearCount = 0;
                 smoothedPoses[i].bornCount++;
                 people[minIndex].taken = true;
-                p.text(i + "," + smoothedPoses[i].bornCount, sp[0].x, sp[0].y - 50);
 
-                p.pushStyle();
-                let fadeIn = Math.min(1, smoothedPoses[i].bornCount * 0.05);
-                p.stroke(255, fadeIn * 255);
-                p.fill(255, fadeIn * 255);
+                // check inversion
+                let normalError = minError;
+                let flippedError = poseDistance({ p0: sp, p1: pose, flipped: true });
+                let flipped = false;
+                if (flippedError < normalError) {
+                    flipped = true;
+                }
+
                 for (let j = 0; j < sp.length; j++) {
+                    let idx = j;
+                    if (flipped) {
+                        idx = flippedIndex[j];
+                    }
                     if (isNaN(sp[j].x) || isNaN(sp[j].y)) {
-                        sp[j].x = pose[j].x;
-                        sp[j].y = pose[j].y;
+                        sp[j].x = pose[idx].x;
+                        sp[j].y = pose[idx].y;
                     }
                     else {
-                        sp[j].x = p.lerp(sp[j].x, pose[j].x, 0.5);
-                        sp[j].y = p.lerp(sp[j].y, pose[j].y, 0.5);
+                        sp[j].x = p.lerp(sp[j].x, pose[idx].x, this.lerping);
+                        sp[j].y = p.lerp(sp[j].y, pose[idx].y, this.lerping);
                     }
-                    p.ellipse(sp[j].x, sp[j].y, 5, 5);
                 }
-                for (let j = 0; j < pairs.length; j++) {
-                    let i0 = pairs[j][0];
-                    let i1 = pairs[j][1];
-                    let x0 = sp[i0].x;
-                    let y0 = sp[i0].y;
-                    let x1 = sp[i1].x;
-                    let y1 = sp[i1].y;
-                    let x2 = p.lerp(x1, x0, 5);
-                    let y2 = p.lerp(y1, y0, 5);
-                    p.line(x2, y2, x1, y1);
-                }
-                p.popStyle();
             }
             else {
                 smoothedPoses[i].disappearCount++;
@@ -151,6 +156,66 @@ var s = function (p) {
                 id = smoothedPoses.length - 1;
             }
 
+        }
+    }
+    p.draw = function () {
+        let t = p.millis() * 0.001;
+        let tw = t % 2;
+        if (tw > 1) tw = 2 - tw;
+
+        let showIds = true;
+        let showPoints = false;
+        let drawStaebe = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let staebeLength = 2;
+        let staebeLfo = false;
+        let lerping = 0.5;
+        this.lerping = lerping;
+
+        p.background(0)
+        p.textSize(24)
+        p.tracking();
+
+        for (let i = 0; i < smoothedPoses.length; i++) {
+            if (smoothedPoses[i].disappearCount >= disappearMax) {
+                continue;
+            }
+            let sp = smoothedPoses[i].pose;
+            if (showIds) {
+                for (let j = 0; j < sp.length; j++) {
+                    if (isNaN(sp[j].x) == false && isNaN(sp[j].y) == false) {
+                        p.text(i + "," + smoothedPoses[i].bornCount, sp[j].x, sp[j].y - 50);
+                        break;
+                    }
+                }
+            }
+
+            p.pushStyle();
+            let fadeIn = Math.min(1, smoothedPoses[i].bornCount * 0.05);
+            p.stroke(255, fadeIn * 255);
+            p.fill(255, fadeIn * 255);
+            if (showPoints) {
+                for (let j = 0; j < sp.length; j++) {
+                    p.ellipse(sp[j].x, sp[j].y, 5, 5);
+                }
+            }
+            for (let j = 0; j < pairs.length; j++) {
+                if (drawStaebe.indexOf(j) >= 0) {
+                    let l = staebeLength;
+                    if (staebeLfo) {
+                        l = l * EasingFunctions.easeInOutCubic(tw);
+                    }
+                    let i0 = pairs[j][0];
+                    let i1 = pairs[j][1];
+                    let x0 = sp[i0].x;
+                    let y0 = sp[i0].y;
+                    let x1 = sp[i1].x;
+                    let y1 = sp[i1].y;
+                    let x2 = p.lerp(x1, x0, l);
+                    let y2 = p.lerp(y1, y0, l);
+                    p.line(x2, y2, x1, y1);
+                }
+            }
+            p.popStyle();
         }
     }
 };

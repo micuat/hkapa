@@ -107,6 +107,12 @@ void setup() {
   frameRate(60);
 
   folderName = "geom";
+  String[] libLines = loadStrings(folderName + "/libraries.config");
+  for(String l: libLines) {
+    if(l.equals("") == false) {
+      libPaths.add(sketchPath("libs/" + l));
+    }
+  }
   scriptPaths.add(sketchPath(folderName + "/sketch.js"));
 }
 
@@ -252,61 +258,6 @@ void initNashorn() {
     e.printStackTrace();
   }
 }
-
-int[][] pairs = {{3, 4}, 
-  {6, 7}, 
-  {2, 3}, 
-  {5, 6}, 
-  {2, 9}, 
-  {5, 12}, 
-  {9, 10}, 
-  {12, 13}, 
-};
-
-// //process events
-// void draw() {
-//   background(0);
-
-//   // OPTION 1: Receive and draw the texture
-//   spout.receiveTexture();
-
-//   // OPTION 2: Receive into PGraphics texture
-//   // pgr = spout.receiveTexture(pgr);
-//   // image(pgr, 0, 0, width, height);
-
-//   // OPTION 3: Receive into PImage texture
-//   // img = spout.receiveTexture(img);
-//   // image(img, 0, 0, width, height);
-
-//   // OPTION 4: Receive into PImage pixels
-//   // img = spout.receivePixels(img);
-//   // image(img, 0, 0, width, height);
-
-//   // Optionally resize the window to match the sender
-//   // spout.resizeFrame();
-
-//   if (json.getJSONArray("people") == null) return;
-//   for (int j = 0; j < json.getJSONArray("people").size(); j++) {
-//     JSONArray points = json.getJSONArray("people").getJSONObject(j).getJSONArray("pose_keypoints_2d");
-
-//     noStroke();
-//     for (int i = 0; i < points.size(); i+=3) {
-//       ellipse(points.getFloat(i), points.getFloat(i+1), 10, 10);
-//     }
-//     stroke(255);
-//     strokeWeight(3);
-//     for (int[] p : pairs) {
-//       float x0 = points.getFloat(p[0] * 3);
-//       float y0 = points.getFloat(p[0] * 3 + 1);
-//       float x1 = points.getFloat(p[1] * 3);
-//       float y1 = points.getFloat(p[1] * 3 + 1);
-//       float x2 = lerp(x1, x0, 4);
-//       float y2 = lerp(y1, y0, 4);
-//       if (x0 != 0 && y0 != 0 && x1 != 0 && y1 != 0)
-//         line(x1, y1, x2, y2);
-//     }
-//   }
-// }
 
 void draw() {
   //surface.setLocation(100, 100);
