@@ -40,13 +40,50 @@ var s = function (p) {
             let found = false;
             let id = -1;
             let sp;
+            let errors = [];
             for (let j = 0; j < smoothedPoses.length; j++) {
-                if (i == j) {
-                    found = true; // fake
-                    id = j;
-                    sp = smoothedPoses[j];
-                    break;
+                // find error
+                let pose1 = smoothedPoses[j];
+                let error = 0;
+                let validCount = 0;
+                for (let k = 0; k < pose1.length; k++) {
+                    let x0 = pose[k].x;
+                    let y0 = pose[k].y;
+                    let x1 = pose1[k].x;
+                    let y1 = pose1[k].y;
+                    if (isNaN(x0) || isNaN(y0) || isNaN(x1) || isNaN(y1)) {
+                    }
+                    else {
+                        error += p.dist(x0, y0, x1, y1);
+                        validCount++;
+                    }
                 }
+                if (validCount > 5) {
+                    errors.push(error / validCount);
+                }
+                else {
+                    errors.push(10000000);
+                }
+                // if (i == j) {
+                //     found = true; // fake
+                //     id = j;
+                //     sp = pose1;
+                //     break;
+                // }
+            }
+
+            let minIndex = -1;
+            let minError = 1000;
+            for (let j = 0; j < errors.length; j++) {
+                if(errors[j] < minError) {
+                    minIndex = j;
+                    minError = errors[j];
+                }
+            }
+            if(minIndex >= 0) {
+                found = true;
+                sp = smoothedPoses[minIndex];
+                id = minIndex;
             }
 
             if (found == false) {
@@ -57,7 +94,7 @@ var s = function (p) {
 
             p.text(" " + id, sp[0].x, sp[0].y - 50);
             for (let j = 0; j < sp.length; j++) {
-                if(isNaN(sp[j].x) || isNaN(sp[j].y)) {
+                if (isNaN(sp[j].x) || isNaN(sp[j].y)) {
                     sp[j].x = pose[j].x;
                     sp[j].y = pose[j].y;
                 }
