@@ -168,7 +168,10 @@ var s = function (p) {
         let drawStaebe = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         let staebeLength = 2;
         let staebeLfo = false;
+        let staebeLineFade = true;
+        let showTrace = true;
         let lerping = 0.5;
+
         this.lerping = lerping;
 
         p.background(0)
@@ -176,43 +179,68 @@ var s = function (p) {
         p.tracking();
 
         for (let i = 0; i < smoothedPoses.length; i++) {
-            if (smoothedPoses[i].disappearCount >= disappearMax) {
+            let smoothedPose = smoothedPoses[i];
+            if (smoothedPose.disappearCount >= disappearMax) {
                 continue;
             }
-            let sp = smoothedPoses[i].pose;
+            let sp = smoothedPose.pose;
+
+            if (smoothedPose.trace == undefined) {
+                smoothedPose.trace = [];
+            }
+            let trace = smoothedPose.trace;
+            let spClone = [];
+            for (let j = 0; j < sp.length; j++) {
+                spClone.push({ x: sp[j].x, y: sp[j].y });
+            }
+            trace.push(spClone);
+            if (trace.length > 30) {
+                trace.shift();
+            }
             if (showIds) {
                 for (let j = 0; j < sp.length; j++) {
                     if (isNaN(sp[j].x) == false && isNaN(sp[j].y) == false) {
-                        p.text(i + "," + smoothedPoses[i].bornCount, sp[j].x, sp[j].y - 50);
+                        p.text(i + "," + smoothedPose.bornCount, sp[j].x, sp[j].y - 50);
                         break;
                     }
                 }
             }
 
             p.pushStyle();
-            let fadeIn = Math.min(1, smoothedPoses[i].bornCount * 0.05);
-            p.stroke(255, fadeIn * 255);
+            let fadeIn = Math.min(1, smoothedPose.bornCount * 0.05);
+            p.noStroke();
             p.fill(255, fadeIn * 255);
             if (showPoints) {
                 for (let j = 0; j < sp.length; j++) {
                     p.ellipse(sp[j].x, sp[j].y, 5, 5);
                 }
             }
-            for (let j = 0; j < pairs.length; j++) {
-                if (drawStaebe.indexOf(j) >= 0) {
-                    let l = staebeLength;
-                    if (staebeLfo) {
-                        l = l * EasingFunctions.easeInOutCubic(tw);
+            for (let k = 0; k < trace.length; k++) {
+                if (showTrace == false && k != trace.length - 1) {
+                    continue;
+                }
+                let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
+                p.stroke(255, fadeIn * 255);
+
+                let l = staebeLength;
+                if (staebeLineFade) {
+                    l *= ktw;
+                }
+                if (staebeLfo) {
+                    l = l * EasingFunctions.easeOutCubic(tw);
+                }
+                for (let j = 0; j < pairs.length; j++) {
+                    if (drawStaebe.indexOf(j) >= 0) {
+                        let i0 = pairs[j][0];
+                        let i1 = pairs[j][1];
+                        let x0 = trace[k][i0].x;
+                        let y0 = trace[k][i0].y;
+                        let x1 = trace[k][i1].x;
+                        let y1 = trace[k][i1].y;
+                        let x2 = p.lerp(x1, x0, l);
+                        let y2 = p.lerp(y1, y0, l);
+                        p.line(x2, y2, x1, y1);
                     }
-                    let i0 = pairs[j][0];
-                    let i1 = pairs[j][1];
-                    let x0 = sp[i0].x;
-                    let y0 = sp[i0].y;
-                    let x1 = sp[i1].x;
-                    let y1 = sp[i1].y;
-                    let x2 = p.lerp(x1, x0, l);
-                    let y2 = p.lerp(y1, y0, l);
-                    p.line(x2, y2, x1, y1);
                 }
             }
             p.popStyle();

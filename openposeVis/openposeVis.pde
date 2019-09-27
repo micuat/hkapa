@@ -281,8 +281,8 @@ void draw() {
   //background(0);
 
   try {
-    //nashorn.eval("for(var prop in pApplet) {if(!this.isReservedFunction(prop)) {alternateSketch[prop] = pApplet[prop]}}");
-    nashorn.eval("alternateSketch.jsonString = pApplet.jsonString");
+    nashorn.eval("for(var prop in pApplet) {if(!this.isReservedFunction(prop)) {alternateSketch[prop] = pApplet[prop]}}");
+    //nashorn.eval("alternateSketch.jsonString = pApplet.jsonString");
     if (drawMode == "webgl") {
       translate(width / 2, height / 2);
     }
