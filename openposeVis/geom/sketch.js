@@ -36,6 +36,7 @@ var s = function (p) {
         let people = poses.people;
 
         for (let j = 0; j < smoothedPoses.length; j++) {
+            smoothedPoses[j].taken = false;;
             smoothedPoses[j].disappearCount++;
         }
 
@@ -74,18 +75,12 @@ var s = function (p) {
                 else {
                     errors.push(maxError);
                 }
-                // if (i == j) {
-                //     found = true; // fake
-                //     id = j;
-                //     sp = pose1;
-                //     break;
-                // }
             }
 
             let minIndex = -1;
             let minError = maxError;
             for (let j = 0; j < errors.length; j++) {
-                if(errors[j] < minError) {
+                if(smoothedPoses[j].taken == false && errors[j] < minError) {
                     minIndex = j;
                     minError = errors[j];
                 }
@@ -94,6 +89,7 @@ var s = function (p) {
                 found = true;
                 sp = smoothedPoses[minIndex].pose;
                 smoothedPoses[minIndex].disappearCount = 0;
+                smoothedPoses[minIndex].taken = true;
                 id = minIndex;
             }
 
