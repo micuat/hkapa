@@ -331,6 +331,7 @@ void draw() {
 
   try {
     //nashorn.eval("for(var prop in pApplet) {if(!this.isReservedFunction(prop)) {alternateSketch[prop] = pApplet[prop]}}");
+    nashorn.eval("alternateSketch.jsonString = pApplet.jsonString");
     if (drawMode == "webgl") {
       translate(width / 2, height / 2);
     }
@@ -605,6 +606,6 @@ void oscEvent(OscMessage theOscMessage) {
     if(theOscMessage.checkTypetag("s")) {
       jsonString = theOscMessage.get(0).stringValue();
       return;
-    }  
+    }
   } 
 }
