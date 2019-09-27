@@ -35,6 +35,12 @@ var s = function (p) {
         if (poses.people == undefined) return;
         let people = poses.people;
 
+        for (let j = 0; j < smoothedPoses.length; j++) {
+            smoothedPoses[j].disappearCount++;
+        }
+
+        let maxError = 100;
+        let disappearMax = 15;
         for (let i = 0; i < people.length; i++) {
             let pose = unpackPose(people[i].pose_keypoints_2d);
             let found = false;
@@ -42,8 +48,12 @@ var s = function (p) {
             let sp;
             let errors = [];
             for (let j = 0; j < smoothedPoses.length; j++) {
+                if(smoothedPoses[j].disappearCount >= disappearMax) {
+                    errors.push(maxError);
+                    continue;
+                }
                 // find error
-                let pose1 = smoothedPoses[j];
+                let pose1 = smoothedPoses[j].pose;
                 let error = 0;
                 let validCount = 0;
                 for (let k = 0; k < pose1.length; k++) {
@@ -62,7 +72,7 @@ var s = function (p) {
                     errors.push(error / validCount);
                 }
                 else {
-                    errors.push(10000000);
+                    errors.push(maxError);
                 }
                 // if (i == j) {
                 //     found = true; // fake
@@ -73,7 +83,7 @@ var s = function (p) {
             }
 
             let minIndex = -1;
-            let minError = 1000;
+            let minError = maxError;
             for (let j = 0; j < errors.length; j++) {
                 if(errors[j] < minError) {
                     minIndex = j;
@@ -82,14 +92,27 @@ var s = function (p) {
             }
             if(minIndex >= 0) {
                 found = true;
-                sp = smoothedPoses[minIndex];
+                sp = smoothedPoses[minIndex].pose;
+                smoothedPoses[minIndex].disappearCount = 0;
                 id = minIndex;
             }
 
             if (found == false) {
-                smoothedPoses.push(pose)
-                sp = pose;
-                id = smoothedPoses.length - 1;
+                id = -1;
+                for(let j = 0; j < smoothedPoses.length; j++) {
+                    if(smoothedPoses[j].disappearCount >= disappearMax) {
+                        smoothedPoses[j].pose = pose;
+                        smoothedPoses[j].disappearCount = 0;
+                        sp = pose;
+                        id = j;
+                        break;
+                    }
+                }
+                if(id < 0) {
+                    smoothedPoses.push({pose: pose, disappearCount: 0})
+                    sp = pose;
+                    id = smoothedPoses.length - 1;
+                }
             }
 
             p.text(" " + id, sp[0].x, sp[0].y - 50);
@@ -99,8 +122,8 @@ var s = function (p) {
                     sp[j].y = pose[j].y;
                 }
                 else {
-                    sp[j].x = p.lerp(sp[j].x, pose[j].x, 0.1);
-                    sp[j].y = p.lerp(sp[j].y, pose[j].y, 0.1);
+                    sp[j].x = p.lerp(sp[j].x, pose[j].x, 0.5);
+                    sp[j].y = p.lerp(sp[j].y, pose[j].y, 0.5);
                 }
                 p.ellipse(sp[j].x, sp[j].y, 5, 5);
             }
