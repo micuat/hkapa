@@ -53,7 +53,7 @@ float frameRate() {
   return frameRate;
 }
 
-PGraphics pgr; // Canvas to receive a texture
+public PGraphics pgr; // Canvas to receive a texture
 PImage img; // Image to receive a texture
 
 // DECLARE A SPOUT OBJECT
@@ -67,7 +67,8 @@ public String jsonString = "";
  * init
  */
 void setup() {
-  size(1280, 720, P3D);
+  //size(1280, 720, P3D);
+  fullScreen(P3D, 2);
 
   // Needed for resizing the window to the sender size
   // Processing 3+ only
@@ -279,6 +280,8 @@ void draw() {
   }
   stroke(255);
   //background(0);
+
+  pgr = spout.receiveTexture(pgr);
 
   try {
     nashorn.eval("for(var prop in pApplet) {if(!this.isReservedFunction(prop)) {alternateSketch[prop] = pApplet[prop]}}");
