@@ -237,7 +237,7 @@ PImage depthImg;
       
     // optical flow object
     opticalflow = new DwOpticalFlow(context, pg_movie_w, pg_movie_h);
-    opticalflow.param.display_mode = 1;
+    opticalflow.param.display_mode = 3;
     
     server = new SyphonServer(this, "Processing Syphon");
 
@@ -284,7 +284,7 @@ PImage depthImg;
     //timeline = new TimeLine(movie, 0, height-20, pg_movie_w, 20);
 
     createGUI();
-    
+    cp5.hide();
     background(0);
     frameRate(60);
   }
@@ -304,13 +304,12 @@ PImage depthImg;
       //movie.read();
       
         // Threshold the depth image
-        int minDepth =  0;
         int maxDepth =  1200; //4.5m
         int[] rawDepth = kinect2.getRawDepth();
         
         
         for (int i=0; i < rawDepth.length; i++) {
-          if (rawDepth[i] >= minDepth && rawDepth[i] <= maxDepth) {
+          if (rawDepth[i] <= maxDepth) {
             depthImg.pixels[i] = color(0);
           } else {
             depthImg.pixels[i] = color(255);
@@ -338,15 +337,15 @@ PImage depthImg;
       // render to offscreenbuffer
       pg_movie.beginDraw();
       pg_movie.background(0);
-      pg_movie.imageMode(CENTER);
+      //pg_movie.imageMode(CENTER);
       pg_movie.pushMatrix();
-      pg_movie.translate(pg_movie_w/2f, pg_movie_h/2f);
-      pg_movie.scale(0.95f);
-  int w = 205;
-  int h = -94;
+      //pg_movie.translate(pg_movie_w/2f, pg_movie_h/2f);
+      //pg_movie.scale(0.95f);
+  int w = 0;
+  int h = 0;
   int x = 0;
-  int y = 241;
-  pg_movie.image(depthImg, w+x, h+y, width-w*2, height-h*2);
+  int y = 0;
+  pg_movie.image(depthImg, x, y, pg_movie.width-w*2, pg_movie.height-h*2);
       //pg_movie.image(depthImg, 0, 0, mov_w_fit, mov_h_fit);
       //pg_movie.image(kinect2.getRegisteredImage(), 0, 0, mov_w_fit, mov_h_fit);
       pg_movie.popMatrix();
@@ -394,7 +393,7 @@ PImage depthImg;
     
     // display result
     background(0);
-    image(pg_oflow, 0, 0);
+    image(pg_oflow, 0, 0, width, height);
     popMatrix();
     server.sendScreen();
     
