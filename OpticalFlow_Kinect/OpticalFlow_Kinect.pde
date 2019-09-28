@@ -221,8 +221,8 @@ PImage depthImg;
   
   
   public void settings() {
-    //size(view_w, view_h, P2D);
-    fullScreen(P2D, 2);
+    size(view_w, view_h, P2D);
+    //fullScreen(P2D, 2);
     smooth(8);
   }
 
@@ -284,7 +284,7 @@ PImage depthImg;
     //timeline = new TimeLine(movie, 0, height-20, pg_movie_w, 20);
 
     createGUI();
-    cp5.hide();
+    //cp5.hide();
     background(0);
     frameRate(60);
   }
@@ -395,7 +395,7 @@ PImage depthImg;
     background(0);
     image(pg_oflow, 0, 0, width, height);
     popMatrix();
-    server.sendScreen();
+    server.sendImage(pg_oflow);
     
     //timeline.draw(mouseX, mouseY);
     
