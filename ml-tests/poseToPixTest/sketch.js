@@ -23,9 +23,10 @@ function drawKeypoints()  {
       let keypoint = pose.keypoints[j];
       // Only draw an ellipse is the pose probability is bigger than 0.2
       if (keypoint.score > 0.0) {
-        fill(255, 0, 0);
+        // fill(255, 0, 0);
+        fill(j * 255 / pose.keypoints.length, 255, 255);
         noStroke();
-        ellipse(keypoint.position.x, keypoint.position.y, 10, 10);
+        ellipse(keypoint.position.x, keypoint.position.y, 20, 20);
       }
     }
   }
@@ -56,7 +57,19 @@ function setup() {
   video.size(640, 360);
 
   // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, ()=>{});
+  // poseNet = ml5.poseNet(video, ()=>{});0
+  var posenetoptions = { 
+    imageScaleFactor: 0.5,
+    outputStride: 16,
+    flipHorizontal: false,
+    minConfidence: 0.1,
+    maxPoseDetections: 1, //detect only single pose
+    scoreThreshold: 0.25,
+    nmsRadius: 20,
+    detectionType: 'single', //detect only single pose
+    multiplier: 0.75,
+  };
+  poseNet = ml5.poseNet(video, posenetoptions, 'single', ()=>{});
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
@@ -105,6 +118,7 @@ function draw() {
   strokeWeight(4);
 
   // We can call both functions to draw all keypoints and the skeletons
+  colorMode(HSB, 255, 255, 255);
   drawSkeleton();
   drawKeypoints();
 }

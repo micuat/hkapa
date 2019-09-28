@@ -52,6 +52,7 @@ function draw() {
   scale(SIZE / video.width, SIZE / video.height);
   strokeWeight(4);
 
+  colorMode(HSB, 255, 255, 255);
   // We can call both functions to draw all keypoints and the skeletons
   drawSkeleton();
   drawKeypoints();
@@ -62,6 +63,23 @@ function draw() {
   }
 }
 
+const pairs = [[0, 1],
+[0, 2],
+[1, 3],
+[2, 4],
+[5, 6],
+[5, 7],
+[7, 9],
+[6, 8],
+[8, 10],
+[11, 12],
+[11, 13],
+[13, 15],
+[12, 14],
+[14, 16],
+[5, 11],
+[6, 12],
+];
 // A function to draw ellipses over the detected keypoints
 function drawKeypoints()  {
   // Loop through all the poses detected
@@ -73,7 +91,7 @@ function drawKeypoints()  {
       let keypoint = pose.keypoints[j];
       // Only draw an ellipse is the pose probability is bigger than 0.2
       if (keypoint.score > 0.0) {
-        fill(255, 0, 0);
+        fill(255 * j / pose.keypoints.length, 255, 255);
         noStroke();
         ellipse(keypoint.position.x, keypoint.position.y, 20, 20);
       }
@@ -85,13 +103,12 @@ function drawKeypoints()  {
 function drawSkeleton() {
   // Loop through all the skeletons detected
   for (let i = 0; i < 1 && i < poses.length; i++) {
-    let skeleton = poses[i].skeleton;
-    // For every skeleton, loop through all body connections
-    for (let j = 0; j < skeleton.length; j++) {
-      let partA = skeleton[j][0];
-      let partB = skeleton[j][1];
-      stroke(255);
-      line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
+    let keypoints = poses[i].pose.keypoints;
+    for (let p of pairs) {
+      stroke(p[0] * 16, 255, 255);
+      let p0 = keypoints[p[0]].position;
+      let p1 = keypoints[p[1]].position;
+      line(p0.x, p0.y, p1.x, p1.y);
     }
   }
 }
