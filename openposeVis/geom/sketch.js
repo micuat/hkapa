@@ -17,7 +17,7 @@ var s = function (p) {
     let smoothedPoses = [];
 
     p.setup = function () {
-        p.createCanvas(1920, 1080);
+        // p.createCanvas(1920, 1080);
         // p.createCanvas(1280, 720);
         p.frameRate(30);
     }
@@ -178,21 +178,16 @@ var s = function (p) {
 
         this.lerping = lerping;
 
-        p.background(0)
-        p.textSize(24)
+        let pg = p.renderPg;
+        pg.beginDraw();
+        pg.clear();
+        pg.textSize(24)
         p.tracking();
 
-        p.strokeWeight(4);
+        pg.strokeWeight(4);
 
-        p.pushMatrix();
-        p.scale(p.width / 1280.0, p.height / 720.0);
-        p.translate(1280 / 2, 720 / 2);
-        // p.scale(-1,1);
-        // p.translate(55, 200);
-        // p.scale(1.25, 1.9);
-        p.translate(-1280 / 2, -720 / 2);
-        p.image(p.pgr, 0, 0, 1280, 720);
-
+        pg.pushMatrix();
+        pg.scale(p.width / 1280.0, p.height / 720.0);
         for (let i = 0; i < smoothedPoses.length; i++) {
             let smoothedPose = smoothedPoses[i];
             if (smoothedPose.disappearCount >= disappearMax) {
@@ -215,19 +210,19 @@ var s = function (p) {
             if (showIds) {
                 for (let j = 0; j < sp.length; j++) {
                     if (isNaN(sp[j].x) == false && isNaN(sp[j].y) == false) {
-                        p.text(i + "," + smoothedPose.bornCount, sp[j].x, sp[j].y - 50);
+                        pg.text(i + "," + smoothedPose.bornCount, sp[j].x, sp[j].y - 50);
                         break;
                     }
                 }
             }
 
-            p.pushStyle();
+            pg.pushStyle();
             let fadeIn = Math.min(1, smoothedPose.bornCount * 0.05);
-            p.noStroke();
-            p.fill(255, fadeIn * 255);
+            pg.noStroke();
+            pg.fill(255, fadeIn * 255);
             if (showPoints) {
                 for (let j = 0; j < sp.length; j++) {
-                    p.ellipse(sp[j].x, sp[j].y, 5, 5);
+                    pg.ellipse(sp[j].x, sp[j].y, 5, 5);
                 }
             }
             for (let k = 0; k < trace.length; k++) {
@@ -235,7 +230,7 @@ var s = function (p) {
                     continue;
                 }
                 let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
-                p.stroke(255, fadeIn * 255);
+                pg.stroke(255, fadeIn * 255);
 
                 let l = staebeLength;
                 if (staebeLineFade) {
@@ -254,13 +249,14 @@ var s = function (p) {
                         let y1 = trace[k][i1].y;
                         let x2 = p.lerp(x1, x0, l);
                         let y2 = p.lerp(y1, y0, l);
-                        p.line(x2, y2, x1, y1);
+                        pg.line(x2, y2, x1, y1);
                     }
                 }
             }
-            p.popStyle();
+            pg.popStyle();
         }
-        p.popMatrix();
+        pg.popMatrix();
+        pg.endDraw();
     }
 };
 

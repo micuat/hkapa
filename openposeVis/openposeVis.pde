@@ -20,15 +20,24 @@ import java.util.Scanner;
 import processing.core.PApplet;
 import processing.opengl.PGraphics2D;
 import processing.awt.PSurfaceAWT;
+import javax.swing.JPanel;
+import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import hypermedia.net.*;
-import spout.*;
 
 import oscP5.*;
 import netP5.*;
 
 OscP5 oscP5;
 NetAddress myRemoteLocation;
+
+public PGraphics renderPg;
+JFrame frame;
+JPanel panel;
 
 private static ScriptEngineManager engineManager;
 private static ScriptEngine nashorn;
@@ -53,12 +62,6 @@ float frameRate() {
   return frameRate;
 }
 
-public PGraphics pgr; // Canvas to receive a texture
-PImage img; // Image to receive a texture
-
-// DECLARE A SPOUT OBJECT
-Spout spout;
-
 UDP udp;  // define the UDP object
 
 public JSONObject json = new JSONObject();
@@ -67,30 +70,32 @@ public String jsonString = "";
  * init
  */
 void setup() {
-  //size(1280, 720, P3D);
-  fullScreen(P3D, 2);
+  //size(1280, 720);
+  fullScreen();
+  //fullScreen(P3D, 2);
+  frame = (JFrame)((PSurfaceAWT.SmoothCanvas) getSurface().getNative()).getFrame();
+  frame.removeNotify();
+  frame.setUndecorated(true);
+  frame.setLayout(null);
+  frame.addNotify();
+
+  renderPg = createGraphics(width, height);
+
+  JPanel panel = new JPanel() {
+    @Override
+      protected void paintComponent(Graphics graphics) {
+      if (graphics instanceof Graphics2D) {
+        Graphics2D g2d = (Graphics2D) graphics;
+        g2d.drawImage(renderPg.image, 0, 0, null);
+      }
+    }
+  };
+
+  frame.setContentPane(panel);
 
   // Needed for resizing the window to the sender size
   // Processing 3+ only
-  surface.setResizable(true);
-
-  // Create a canvas or an image to receive the data.
-  pgr = createGraphics(width, height, PConstants.P2D);
-  img = createImage(width, height, ARGB);
-
-  // Graphics and image objects can be created
-  // at any size, but their dimensions are changed
-  // to match the sender that the receiver connects to.
-
-  // CREATE A NEW SPOUT OBJECT
-  spout = new Spout(this);
-
-  // OPTION : CREATE A NAMED SPOUT RECEIVER
-  //
-  // By default, the active sender will be detected
-  // when receiveTexture is called. But you can specify
-  // the name of the sender to initially connect to.
-  // spout.createReceiver("Spout DX11 Sender");
+  //surface.setResizable(true);
 
   // create a new datagram connection on port 6000
   // and wait for incomming message
@@ -104,7 +109,7 @@ void setup() {
   oscP5 = new OscP5(this, op);  
   myRemoteLocation = new NetAddress("192.168.0.100",13000);
 
-  surface.setResizable(true);
+  //surface.setResizable(true);
   frameRate(60);
 
   folderName = "geom";
@@ -261,12 +266,6 @@ void initNashorn() {
 }
 
 void draw() {
-  if(frameCount % 4 == 0) {
-    OscMessage myMessage = new OscMessage("/openpose/poses");
-    myMessage.add(jsonString);
-    oscP5.send(myMessage, myRemoteLocation);
-  }
-
   //surface.setLocation(100, 100);
   if (libInited == false) {
     initNashorn();
@@ -284,10 +283,6 @@ void draw() {
   catch (IOException e) {
     e.printStackTrace();
   }
-  stroke(255);
-  //background(0);
-
-  pgr = spout.receiveTexture(pgr);
 
   try {
     nashorn.eval("for(var prop in pApplet) {if(!this.isReservedFunction(prop)) {alternateSketch[prop] = pApplet[prop]}}");
@@ -304,6 +299,8 @@ void draw() {
   catch (Exception e) {
     e.printStackTrace();
   }
+  frame.setBackground(new Color(0, 0, 0, 0));
+
 }
 
 private static byte[] encoded;
@@ -383,7 +380,7 @@ public void readFiles(ArrayList<String> paths) throws IOException {
     try {
       nashorn.eval("if(alternateSketch.preload !== undefined) alternateSketch.preload();");
       nashorn.eval("alternateSketch.setup();");
-      surface.setSize(newWidth, newHeight);
+      //surface.setSize(newWidth, newHeight);
     }
     catch (ScriptException e) {
       e.printStackTrace();
