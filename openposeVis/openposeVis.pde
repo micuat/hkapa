@@ -102,15 +102,15 @@ void setup() {
   op.setListeningPort(13000);
   op.setDatagramSize(50000);
   oscP5 = new OscP5(this, op);  
-  //myRemoteLocation = new NetAddress("127.0.0.1",12000);
-  
+  myRemoteLocation = new NetAddress("192.168.0.100",13000);
+
   surface.setResizable(true);
   frameRate(60);
 
   folderName = "geom";
   String[] libLines = loadStrings(folderName + "/libraries.config");
-  for(String l: libLines) {
-    if(l.equals("") == false) {
+  for (String l : libLines) {
+    if (l.equals("") == false) {
       libPaths.add(sketchPath("libs/" + l));
     }
   }
@@ -261,6 +261,12 @@ void initNashorn() {
 }
 
 void draw() {
+  if(frameCount % 4 == 0) {
+    OscMessage myMessage = new OscMessage("/openpose/poses");
+    myMessage.add(jsonString);
+    oscP5.send(myMessage, myRemoteLocation);
+  }
+
   //surface.setLocation(100, 100);
   if (libInited == false) {
     initNashorn();
@@ -396,6 +402,7 @@ public void readFiles(ArrayList<String> paths) throws IOException {
  * byte[] array), but in addition, two arguments (representing in order the 
  * sender IP address and his port) can be set like below.
  */
+int saveCount = 0;
 // void receive( byte[] data ) {       // <-- default handler
 void receive( byte[] data, String ip, int port ) {  // <-- extended handler
 
@@ -407,6 +414,10 @@ void receive( byte[] data, String ip, int port ) {  // <-- extended handler
 
   json = parseJSONObject("{"+jsonString+"}");
 
+  //if(saveCount < 6000) {
+  //  String [] s = {jsonString};
+  //  saveStrings(str(saveCount++) + ".json", s);
+  //}
   // print the result
   //println( "receive: \""+message+"\" from "+ip+" on port "+port );
 }
@@ -556,10 +567,10 @@ void mousePressed(MouseEvent event) {
 }
 
 void oscEvent(OscMessage theOscMessage) {
-  if(theOscMessage.checkAddrPattern("/openpose/poses")==true) {
-    if(theOscMessage.checkTypetag("s")) {
+  if (theOscMessage.checkAddrPattern("/openpose/poses")==true) {
+    if (theOscMessage.checkTypetag("s")) {
       jsonString = theOscMessage.get(0).stringValue();
       return;
     }
-  } 
+  }
 }

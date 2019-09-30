@@ -166,13 +166,15 @@ var s = function (p) {
         if (tw > 1) tw = 2 - tw;
 
         let showIds = false;
-        let showPoints = true;
-        let drawStaebe = [];//[0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let showPoints = false;
+        let drawStaebe = [0, 1, 2, 3];
+        // let drawStaebe = [0, 1, 2, 3, 6, 7, 8, 9];
+        // let drawStaebe = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         let staebeLength = 5;
         let staebeLfo = false;
         let staebeLineFade = true;
         let showTrace = false;
-        let lerping = 0.99;
+        let lerping = 0.5;
 
         this.lerping = lerping;
 
@@ -184,11 +186,12 @@ var s = function (p) {
 
         p.pushMatrix();
         p.scale(p.width / 1280.0, p.height / 720.0);
-        p.translate(p.width / 2, p.height / 2);
-        p.translate(55, 200);
-        p.scale(1.25, 1.9);
-        p.translate(-p.width / 2, -p.height / 2);
-        // p.image(p.pgr, 0, 0, 1280, 720);
+        p.translate(1280 / 2, 720 / 2);
+        // p.scale(-1,1);
+        // p.translate(55, 200);
+        // p.scale(1.25, 1.9);
+        p.translate(-1280 / 2, -720 / 2);
+        p.image(p.pgr, 0, 0, 1280, 720);
 
         for (let i = 0; i < smoothedPoses.length; i++) {
             let smoothedPose = smoothedPoses[i];
