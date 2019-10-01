@@ -165,6 +165,8 @@ var s = function (p) {
         let tw = t % 2;
         if (tw > 1) tw = 2 - tw;
 
+        let jsonUi = JSON.parse(p.jsonUiString);
+
         let showIds = false;
         let showPoints = false;
         let drawStaebe = [0, 1, 2, 3];
@@ -181,6 +183,8 @@ var s = function (p) {
         let pg = p.renderPg;
         pg.beginDraw();
         pg.clear();
+        if(jsonUi.sliders != undefined)
+            pg.background(255, 0, 0, jsonUi.sliders[0] / 1000 * 255);
         pg.textSize(24)
         p.tracking();
 

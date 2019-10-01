@@ -29,8 +29,17 @@ import java.awt.image.BufferedImage;
 
 import hypermedia.net.*;
 
+import http.*;
+import java.util.logging.Level;
+
+import websockets.*;
+
 import oscP5.*;
 import netP5.*;
+
+SimpleHTTPServer httpServer;
+
+WebsocketServer wsServer;
 
 OscP5 oscP5;
 NetAddress myRemoteLocation;
@@ -66,6 +75,7 @@ UDP udp;  // define the UDP object
 
 public JSONObject json = new JSONObject();
 public String jsonString = "";
+public String jsonUiString = "{}";
 /**
  * init
  */
@@ -107,7 +117,15 @@ void setup() {
   op.setListeningPort(13000);
   op.setDatagramSize(50000);
   oscP5 = new OscP5(this, op);  
-  myRemoteLocation = new NetAddress("192.168.0.100",13000);
+  myRemoteLocation = new NetAddress("192.168.0.100", 13000);
+
+  // set the logger level to info
+  httpServer.setLoggerLevel(Level.INFO);
+  // create a server
+  httpServer = new SimpleHTTPServer(this);
+  httpServer.serveAll("");
+
+  wsServer = new WebsocketServer(this, 8025, "/staebe");
 
   //surface.setResizable(true);
   frameRate(60);
@@ -121,8 +139,6 @@ void setup() {
   }
   scriptPaths.add(sketchPath(folderName + "/sketch.js"));
 }
-
-
 
 void initNashorn() {
   String[] options = new String[] { "--language=es6" };
@@ -300,7 +316,6 @@ void draw() {
     e.printStackTrace();
   }
   frame.setBackground(new Color(0, 0, 0, 0));
-
 }
 
 private static byte[] encoded;
@@ -570,4 +585,9 @@ void oscEvent(OscMessage theOscMessage) {
       return;
     }
   }
+}
+
+void webSocketServerEvent(String msg){
+  //println(msg);
+  jsonUiString = msg;
 }

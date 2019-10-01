@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<header>
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		canvas {
+			display: block;
+		}
+
+		.slidecontainer {
+			width: 800px;
+			z-index: 3;
+			position: absolute;
+			top: 0px;
+			left: 0px;
+		}
+
+		.slider {
+			-webkit-appearance: none;
+			width: 50%;
+			height: 50px;
+			background: #d3d3d3;
+			outline: none;
+			opacity: 0.4;
+			-webkit-transition: .2s;
+			transition: opacity .2s;
+		}
+
+		.slider:hover {
+			opacity: 1;
+		}
+
+		.slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 50px;
+			height: 50px;
+			background: #4CAF50;
+			cursor: pointer;
+		}
+
+		.slider::-moz-range-thumb {
+			width: 50px;
+			height: 50px;
+			background: #4CAF50;
+			cursor: pointer;
+		}
+	</style>
+</header>
+
+<body>
+	<div class="slidecontainer">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide0">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide1">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide2">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide3">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide4">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide5">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide6">
+		<input type="range" min="0" max="1000" value="0" class="slider" id="slide7">
+	</div>
+	<script src="sketch.js"></script>
+</body>
+
+</html>
