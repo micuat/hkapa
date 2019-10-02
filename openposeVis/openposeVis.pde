@@ -37,6 +37,8 @@ import websockets.*;
 import oscP5.*;
 import netP5.*;
 
+import processing.sound.*;
+
 SimpleHTTPServer httpServer;
 
 WebsocketServer wsServer;
@@ -47,6 +49,9 @@ NetAddress myRemoteLocation;
 public PGraphics renderPg;
 JFrame frame;
 JPanel panel;
+
+public FFT fft;
+AudioIn audioInput;
 
 private static ScriptEngineManager engineManager;
 private static ScriptEngine nashorn;
@@ -81,8 +86,8 @@ public String jsonUiString = "{}";
  */
 void setup() {
   //size(1280, 720);
-  fullScreen();
-  //fullScreen(P3D, 2);
+  //fullScreen();
+  fullScreen(2);
   frame = (JFrame)((PSurfaceAWT.SmoothCanvas) getSurface().getNative()).getFrame();
   frame.removeNotify();
   frame.setUndecorated(true);
@@ -126,6 +131,12 @@ void setup() {
   httpServer.serveAll("");
 
   wsServer = new WebsocketServer(this, 8025, "/staebe");
+
+  audioInput = new AudioIn(this, 0);
+  audioInput.start();
+  int bands = 4;
+  fft = new FFT(this, bands);
+  fft.input(audioInput);
 
   //surface.setResizable(true);
   frameRate(60);

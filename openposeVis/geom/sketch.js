@@ -15,6 +15,7 @@ var s = function (p) {
         22, 23, 24, 19, 20, 21];
 
     let smoothedPoses = [];
+    let smoothedAmps = [0, 0, 0, 0];
 
     p.setup = function () {
         // p.createCanvas(1920, 1080);
@@ -165,6 +166,8 @@ var s = function (p) {
         let tw = t % 2;
         if (tw > 1) tw = 2 - tw;
 
+        p.fft.analyze();
+
         let jsonUi = JSON.parse(p.jsonUiString);
 
         let showIds = false;
@@ -172,9 +175,9 @@ var s = function (p) {
         let staebePairToType = [0, 0, 0, 0, 2, 2, 1, 1, 1, 1];
         let staebeMaxLength = 5;
         let staebeLengths = [0, 0, 0];
-        if(jsonUi.sliders != undefined) {
-            for(let i = 0; i < 3; i++) {
-                    staebeLengths[i] = jsonUi.sliders[i] / 1000 * staebeMaxLength;
+        if (jsonUi.sliders != undefined) {
+            for (let i = 0; i < 3; i++) {
+                staebeLengths[i] = jsonUi.sliders[i] / 1000 * staebeMaxLength;
             }
         }
         let staebeLfo = false;
@@ -182,16 +185,27 @@ var s = function (p) {
         let showTrace = false;
         let lerping = 0.5;
 
+        for(let i = 0; i < smoothedAmps.length; i++) {
+            smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
+            if(jsonUi.sliders != undefined)
+                smoothedAmps[i] = p.lerp(0.5, smoothedAmps[i], jsonUi.sliders[3]/1000.0);
+        }
+        let lineColor = { r: 255, g: 255, b: 255 };
+        // let lineColor = { r: 255, g: 255-amp*255, b: 255-amp*255 };
+
         this.lerping = lerping;
 
         let pg = p.renderPg;
         pg.beginDraw();
         pg.clear();
-        // if(jsonUi.sliders != undefined)
-        //     pg.background(255, 0, 0, jsonUi.sliders[0] / 1000 * 255);
         pg.textSize(24)
         p.tracking();
 
+        // if(p.frameCount % 30 == 0) {
+        //     print(jsonUi.sliders[4])
+        // }
+        if(jsonUi.sliders != undefined)
+            pg.background(0, 0, 0, jsonUi.sliders[4] / 1000.0 * 255);
         pg.strokeWeight(4);
 
         pg.pushMatrix();
@@ -238,7 +252,7 @@ var s = function (p) {
                     continue;
                 }
                 let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
-                pg.stroke(255, fadeIn * 255);
+                pg.stroke(lineColor.r, lineColor.g, lineColor.b, fadeIn * 255);
 
                 let L = 1;
                 if (staebeLineFade) {
@@ -248,7 +262,14 @@ var s = function (p) {
                     L *= EasingFunctions.easeOutCubic(tw);
                 }
                 for (let j = 0; j < pairs.length; j++) {
-                    let l = L * staebeLengths[staebePairToType[j]];
+                    let staebeType = staebePairToType[j];
+                    let l = L * staebeLengths[staebeType];
+                    if(staebeType == 0) {
+                        l *= p.constrain(smoothedAmps[0] * 2+0.5, 0.5, 1.5);
+                    }
+                    if(staebeType == 1) {
+                        l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
+                    }
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
                     let x0 = trace[k][i0].x;
