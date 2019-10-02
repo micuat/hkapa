@@ -169,10 +169,14 @@ var s = function (p) {
 
         let showIds = false;
         let showPoints = false;
-        let drawStaebe = [0, 1, 2, 3];
-        // let drawStaebe = [0, 1, 2, 3, 6, 7, 8, 9];
-        // let drawStaebe = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        let staebeLength = 5;
+        let staebePairToType = [0, 0, 0, 0, 2, 2, 1, 1, 1, 1];
+        let staebeMaxLength = 5;
+        let staebeLengths = [0, 0, 0];
+        if(jsonUi.sliders != undefined) {
+            for(let i = 0; i < 3; i++) {
+                    staebeLengths[i] = jsonUi.sliders[i] / 1000 * staebeMaxLength;
+            }
+        }
         let staebeLfo = false;
         let staebeLineFade = true;
         let showTrace = false;
@@ -183,8 +187,8 @@ var s = function (p) {
         let pg = p.renderPg;
         pg.beginDraw();
         pg.clear();
-        if(jsonUi.sliders != undefined)
-            pg.background(255, 0, 0, jsonUi.sliders[0] / 1000 * 255);
+        // if(jsonUi.sliders != undefined)
+        //     pg.background(255, 0, 0, jsonUi.sliders[0] / 1000 * 255);
         pg.textSize(24)
         p.tracking();
 
@@ -236,25 +240,24 @@ var s = function (p) {
                 let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
                 pg.stroke(255, fadeIn * 255);
 
-                let l = staebeLength;
+                let L = 1;
                 if (staebeLineFade) {
-                    l *= ktw;
+                    L *= ktw;
                 }
                 if (staebeLfo) {
-                    l = l * EasingFunctions.easeOutCubic(tw);
+                    L *= EasingFunctions.easeOutCubic(tw);
                 }
                 for (let j = 0; j < pairs.length; j++) {
-                    if (drawStaebe.indexOf(j) >= 0) {
-                        let i0 = pairs[j][0];
-                        let i1 = pairs[j][1];
-                        let x0 = trace[k][i0].x;
-                        let y0 = trace[k][i0].y;
-                        let x1 = trace[k][i1].x;
-                        let y1 = trace[k][i1].y;
-                        let x2 = p.lerp(x1, x0, l);
-                        let y2 = p.lerp(y1, y0, l);
-                        pg.line(x2, y2, x1, y1);
-                    }
+                    let l = L * staebeLengths[staebePairToType[j]];
+                    let i0 = pairs[j][0];
+                    let i1 = pairs[j][1];
+                    let x0 = trace[k][i0].x;
+                    let y0 = trace[k][i0].y;
+                    let x1 = trace[k][i1].x;
+                    let y1 = trace[k][i1].y;
+                    let x2 = p.lerp(x1, x0, l);
+                    let y2 = p.lerp(y1, y0, l);
+                    pg.line(x2, y2, x1, y1);
                 }
             }
             pg.popStyle();
