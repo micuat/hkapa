@@ -1,3 +1,30 @@
+function Particle(p, pg) {
+    this.pos = { x: Math.random() * pg.width, y: Math.random() * pg.height };
+    let v = p5.Vector.random2D();
+    // this.vel = {x: -5, y: 5};
+    this.vel = { x: 5 * v.x, y: 5 * v.y };
+    this.rot = 0;
+    this.rVel = (Math.random() - 0.5) * 0.3;
+    this.l = 100;
+    this.update = function () {
+        this.pos.x += this.vel.x;
+        this.pos.y += this.vel.y;
+        if (this.pos.x < -this.l) this.pos.x = pg.width / 2 + this.l;
+        if (this.pos.x > pg.width / 2 + this.l) this.pos.x = - this.l;
+        if (this.pos.y < -this.l) this.pos.y = pg.height / 2 + this.l;
+        if (this.pos.y > pg.height / 2 + this.l) this.pos.y = - this.l;
+        this.rot += this.rVel;
+        let dx = Math.cos(this.rot);
+        let dy = Math.sin(this.rot);
+        this.x0 = this.pos.x + dx * -this.l * 0.5;
+        this.y0 = this.pos.y + dy * -this.l * 0.5;
+        this.x1 = this.pos.x + dx * this.l * 0.5;
+        this.y1 = this.pos.y + dy * this.l * 0.5;
+        // pg.stroke(255);
+        // pg.line(this.x0, this.y0, this.x1, this.y1);
+    }
+}
+
 var s = function (p) {
     let pairs = [[3, 4],
     [6, 7],
@@ -16,11 +43,16 @@ var s = function (p) {
 
     let smoothedPoses = [];
     let smoothedAmps = [0, 0, 0, 0];
+    let particles = [];
 
     p.setup = function () {
         // p.createCanvas(1920, 1080);
         // p.createCanvas(1280, 720);
         p.frameRate(30);
+
+        for (let i = 0; i < 100; i++) {
+            particles.push(new Particle(p, p.renderPg));
+        }
     }
 
     function unpackPose(pose) {
@@ -201,6 +233,10 @@ var s = function (p) {
         pg.textSize(24)
         p.tracking();
 
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+        }
+
         // if(p.frameCount % 30 == 0) {
         //     print(jsonUi.sliders[4])
         // }
@@ -216,6 +252,7 @@ var s = function (p) {
 
         pg.pushMatrix();
         pg.scale(p.width / 1280.0, p.height / 720.0);
+        let staebeCount = 0;
         for (let i = 0; i < smoothedPoses.length; i++) {
             let smoothedPose = smoothedPoses[i];
             if (smoothedPose.disappearCount >= disappearMax) {
@@ -283,12 +320,31 @@ var s = function (p) {
 
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
-                    let x0 = trace[k][i0].x;
-                    let y0 = trace[k][i0].y;
-                    let x1 = trace[k][i1].x;
-                    let y1 = trace[k][i1].y;
-                    let x2 = p.lerp(x1, x0, l);
-                    let y2 = p.lerp(y1, y0, l);
+                    let xt0 = trace[k][i0].x;
+                    let yt0 = trace[k][i0].y;
+                    let xt1 = trace[k][i1].x;
+                    let yt1 = trace[k][i1].y;
+                    let xt2 = p.lerp(xt1, xt0, l);
+                    let yt2 = p.lerp(yt1, yt0, l);
+
+                    // let xp2 = p.noise(t * 0.5, xt0 * 0.01) * 0.5 * pg.width;
+                    // let yp2 = p.noise(t * 0.5, yt0 * 0.01) * 0.5 * pg.height;
+                    // let xp1 = p.noise(t * 0.5, xt1 * 0.01) * 0.5 * pg.width;
+                    // let yp1 = p.noise(t * 0.5, yt1 * 0.01) * 0.5 * pg.height;
+                    let pt = particles[(staebeCount++) % particles.length];
+                    let xp2 = pt.x0;
+                    let yp2 = pt.y0;
+                    let xp1 = pt.x1;
+                    let yp1 = pt.y1;
+
+                    let particleLerp = 0;
+                    if (jsonUi.sliders != undefined) {
+                        particleLerp = jsonUi.sliders[5] / 1000.0;
+                    }
+                    let x2 = p.lerp(xt2, xp2, particleLerp);
+                    let y2 = p.lerp(yt2, yp2, particleLerp);
+                    let x1 = p.lerp(xt1, xp1, particleLerp);
+                    let y1 = p.lerp(yt1, yp1, particleLerp);
                     pg.line(x2, y2, x1, y1);
                 }
                 function drawSpaghetti() {
