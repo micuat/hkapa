@@ -185,10 +185,10 @@ var s = function (p) {
         let showTrace = false;
         let lerping = 0.5;
 
-        for(let i = 0; i < smoothedAmps.length; i++) {
+        for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
-            if(jsonUi.sliders != undefined)
-                smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliders[3]/1000.0);
+            if (jsonUi.sliders != undefined)
+                smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliders[3] / 1000.0);
         }
         let lineColor = { r: 255, g: 255, b: 255 };
         // let lineColor = { r: 255, g: 255-amp*255, b: 255-amp*255 };
@@ -204,14 +204,14 @@ var s = function (p) {
         // if(p.frameCount % 30 == 0) {
         //     print(jsonUi.sliders[4])
         // }
-        if(jsonUi.sliders != undefined) {
+        if (jsonUi.sliders != undefined) {
             pg.background(0, 0, 0, jsonUi.sliders[4] / 1000.0 * 255);
         }
 
         pg.strokeWeight(1);
         pg.noFill();
         pg.stroke(0);
-        pg.rect(0, 0, pg.width-1, pg.height-1);
+        pg.rect(0, 0, pg.width - 1, pg.height - 1);
         pg.strokeWeight(4);
 
         pg.pushMatrix();
@@ -276,7 +276,7 @@ var s = function (p) {
                     //     l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
                     // }
                     let alpha = fadeIn * 255;
-                    if(staebeLengths[staebeType] == 0) {
+                    if (staebeLengths[staebeType] == 0) {
                         alpha = 0;
                     }
                     pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
@@ -290,6 +290,21 @@ var s = function (p) {
                     let x2 = p.lerp(x1, x0, l);
                     let y2 = p.lerp(y1, y0, l);
                     pg.line(x2, y2, x1, y1);
+                }
+                function drawSpaghetti() {
+                    pg.noFill();
+                    pg.stroke(255);
+                    pg.beginShape();
+                    pg.curveVertex(trace[index][4].x, trace[index][4].y);
+                    pg.curveVertex(trace[index][4].x, trace[index][4].y);
+                    pg.curveVertex(trace[index][3].x, trace[index][3].y);
+                    pg.curveVertex(trace[index][2].x, trace[index][2].y);
+                    // pg.curveVertex(trace[index][1].x, trace[index][1].y);
+                    pg.curveVertex(trace[index][5].x, trace[index][5].y);
+                    pg.curveVertex(trace[index][6].x, trace[index][6].y);
+                    pg.curveVertex(trace[index][7].x, trace[index][7].y);
+                    pg.curveVertex(trace[index][7].x, trace[index][7].y);
+                    pg.endShape();
                 }
             }
             pg.popStyle();
