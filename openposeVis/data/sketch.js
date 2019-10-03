@@ -39,13 +39,13 @@ ws.onopen = function (event) {
 
 
 const sliderValues = new Array(8);
-const presets = [
-	[200, 0, 0, 0, 1000, 0, 0, 0],
-	[200, 0, 0, 0, 0, 0, 0, 0],
-	[200, 0, 0, 0, 0, 0, 0, 0],
-	[200, 200, 0, 0, 0, 0, 0, 0],
-	[200, 200, 200, 0, 0, 0, 0, 0]
-];
+const presets = {
+	armOnBlack: [200, 0, 0, 0, 1000, 0, 0, 0],
+	armOnVideo: [400, 0, 0, 0, 0, 0, 0, 0],
+	armAndLeg: [400, 400, 0, 0, 0, 0, 0, 0],
+	all: [400, 400, 400, 0, 0, 0, 0, 0],
+	keith: [0, 200, 300, 0, 1000, 0, 0, 0]
+};
 
 const numSliders = 5;
 let radios = document.forms['presetForm'].elements['preset'];
