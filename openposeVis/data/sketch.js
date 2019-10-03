@@ -47,7 +47,7 @@ const presets = {
 	keith: [0, 200, 300, 0, 1000, 0, 0, 0]
 };
 
-const numSliders = 7;
+const numSliders = 8;
 let radios = document.forms['presetForm'].elements['preset'];
 
 

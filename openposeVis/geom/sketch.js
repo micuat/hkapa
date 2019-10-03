@@ -46,11 +46,17 @@ var s = function (p) {
     let smoothedAmps = [0, 0, 0, 0];
     let particles = [];
 
-    let terrain = {
+    let terrainBottom = {
         tl: [100, 550],
         tr: [1100, 550],
         bl: [-500, 690],
         br: [1700, 690]
+    }
+    let terrainWall = {
+        tl: [100, 550],
+        tr: [1100, 550],
+        bl: [100, 100],
+        br: [1100, 100]
     }
 
     p.setup = function () {
@@ -227,8 +233,9 @@ var s = function (p) {
 
         for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
-            if (jsonUi.sliders != undefined)
+            if (jsonUi.sliders != undefined) {
                 smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliders[3] / 1000.0);
+            }
         }
         let lineColor = { r: 255, g: 255, b: 255 };
         // let lineColor = { r: 255, g: 255-amp*255, b: 255-amp*255 };
@@ -265,6 +272,16 @@ var s = function (p) {
         pg.stroke(255);
         let gridN = 12;
         let gridMatrix = [];
+        let terrain = {};
+        for (let key in terrainBottom) {
+            let pl = 0;
+            if (jsonUi.sliders != undefined) {
+                pl = jsonUi.sliders[7] * 0.001;
+            }
+        let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
+            let y = p.lerp(terrainBottom[key][1], terrainWall[key][1], pl);
+            terrain[key] = [x, y];
+        }
         for (let i = 0; i <= gridN; i++) {
             gridMatrix[i] = [];
             for (let j = 0; j <= gridN; j++) {
