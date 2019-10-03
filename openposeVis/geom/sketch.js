@@ -9,10 +9,11 @@ function Particle(p, pg) {
     this.update = function () {
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
-        if (this.pos.x < -this.l) this.pos.x = pg.width / 2 + this.l;
-        if (this.pos.x > pg.width / 2 + this.l) this.pos.x = - this.l;
-        if (this.pos.y < -this.l) this.pos.y = pg.height / 2 + this.l;
-        if (this.pos.y > pg.height / 2 + this.l) this.pos.y = - this.l;
+        let w = 1920, h = 1080;
+        if (this.pos.x < -this.l) this.pos.x = w / 2 + this.l;
+        if (this.pos.x > w / 2 + this.l) this.pos.x = - this.l;
+        if (this.pos.y < -this.l) this.pos.y = h / 2 + this.l;
+        if (this.pos.y > h / 2 + this.l) this.pos.y = - this.l;
         this.rot += this.rVel;
         let dx = Math.cos(this.rot);
         let dy = Math.sin(this.rot);
@@ -44,6 +45,13 @@ var s = function (p) {
     let smoothedPoses = [];
     let smoothedAmps = [0, 0, 0, 0];
     let particles = [];
+
+    let terrain = {
+        tl: [300, 500],
+        tr: [1000, 500],
+        bl: [100, 600],
+        br: [1200, 600]
+    }
 
     p.setup = function () {
         // p.createCanvas(1920, 1080);
@@ -248,11 +256,22 @@ var s = function (p) {
         pg.noFill();
         pg.stroke(0);
         pg.rect(0, 0, pg.width - 1, pg.height - 1);
-        pg.strokeWeight(4);
 
         pg.pushMatrix();
         pg.scale(p.width / 1280.0, p.height / 720.0);
         let staebeCount = 0;
+
+        pg.strokeWeight(2);
+        pg.stroke(255);
+        pg.beginShape();
+        pg.vertex(terrain.tl[0], terrain.tl[1]);
+        pg.vertex(terrain.tr[0], terrain.tr[1]);
+        pg.vertex(terrain.br[0], terrain.br[1]);
+        pg.vertex(terrain.bl[0], terrain.bl[1]);
+        pg.vertex(terrain.tl[0], terrain.tl[1]);
+        pg.endShape();
+
+        pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
             let smoothedPose = smoothedPoses[i];
             if (smoothedPose.disappearCount >= disappearMax) {
