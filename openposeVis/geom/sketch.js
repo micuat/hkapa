@@ -204,8 +204,14 @@ var s = function (p) {
         // if(p.frameCount % 30 == 0) {
         //     print(jsonUi.sliders[4])
         // }
-        if(jsonUi.sliders != undefined)
+        if(jsonUi.sliders != undefined) {
             pg.background(0, 0, 0, jsonUi.sliders[4] / 1000.0 * 255);
+        }
+
+        pg.strokeWeight(1);
+        pg.noFill();
+        pg.stroke(0);
+        pg.rect(0, 0, pg.width-1, pg.height-1);
         pg.strokeWeight(4);
 
         pg.pushMatrix();

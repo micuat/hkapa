@@ -3,6 +3,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import javax.script.Invocable;
+import javax.script.Compilable;
 
 import java.lang.NoSuchMethodException;
 import java.lang.reflect.*;
@@ -85,9 +86,9 @@ public String jsonUiString = "{}";
  * init
  */
 void setup() {
-  //size(1280, 720);
+  size(1280, 720);
   //fullScreen();
-  fullScreen(2);
+  //fullScreen(2);
   frame = (JFrame)((PSurfaceAWT.SmoothCanvas) getSurface().getNative()).getFrame();
   frame.removeNotify();
   frame.setUndecorated(true);
@@ -108,14 +109,7 @@ void setup() {
 
   frame.setContentPane(panel);
 
-  // Needed for resizing the window to the sender size
-  // Processing 3+ only
-  //surface.setResizable(true);
-
-  // create a new datagram connection on port 6000
-  // and wait for incomming message
   udp = new UDP( this, 8051 );
-  //udp.log( true );     // <-- printout the connection activity
   udp.listen( true );
 
   OscProperties op = new OscProperties();
@@ -394,7 +388,12 @@ public void readFiles(ArrayList<String> paths) throws IOException {
       encoded = Files.readAllBytes(Paths.get(path));
 
       try {
-        nashorn.eval(new String(encoded, StandardCharsets.UTF_8));
+        String script = new String(encoded, StandardCharsets.UTF_8);
+        nashorn.eval(script);
+      }
+      catch (AssertionError e) {
+        // most likely syntax error
+        e.printStackTrace();
       }
       catch (ScriptException e) {
         e.printStackTrace();
