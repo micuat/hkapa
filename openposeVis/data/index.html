@@ -50,16 +50,37 @@
 			background: #4CAF50;
 			cursor: pointer;
 		}
+
+		label {
+			display: inline-block;
+			width: 140px;
+			text-align: right;
+		}
 	</style>
 </header>
 
 <body>
 	<div class="slidecontainer">
-		<input type="range" min="0" max="1000" value="0" class="slider" id="slide0">
-		<input type="range" min="0" max="1000" value="0" class="slider" id="slide1">
-		<input type="range" min="0" max="1000" value="0" class="slider" id="slide2">
-		<input type="range" min="0" max="1000" value="0" class="slider" id="slide3">
-		<input type="range" min="0" max="1000" value="0" class="slider" id="slide4">
+		<div class="block">
+			<label>Arm Length</label>
+			<input type="range" min="0" max="1000" value="0" class="slider" id="slide0">
+		</div>
+		<div class="block">
+			<label>Leg Length</label>
+			<input type="range" min="0" max="1000" value="0" class="slider" id="slide1">
+		</div>
+		<div class="block">
+			<label>Spine Length</label>
+			<input type="range" min="0" max="1000" value="0" class="slider" id="slide2">
+		</div>
+		<div class="block">
+			<label>Background</label>
+			<input type="range" min="0" max="1000" value="0" class="slider" id="slide4">
+		</div>
+		<div class="block">
+			<label>Audio Reactive</label>
+			<input type="range" min="0" max="1000" value="0" class="slider" id="slide3">
+		</div>
 	</div>
 	<script src="sketch.js"></script>
 </body>
