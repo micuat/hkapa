@@ -4,7 +4,7 @@ ws.onopen = function (event) {
 	for (let i = 0; i < radios.length; i++) {
 		radios[i].onclick = function () {
 			const preset = presets[this.value];
-			for (let j = 0; j < 5; j++) {
+			for (let j = 0; j < numSliders; j++) {
 				TweenLite.to(document.getElementById('slide' + j), 1, { value: preset[j], autoAlpha: 0, ease: Power4.easeInOut });
 			}
 			let count = 0;
@@ -47,7 +47,7 @@ const presets = {
 	keith: [0, 200, 300, 0, 1000, 0, 0, 0]
 };
 
-const numSliders = 6;
+const numSliders = 7;
 let radios = document.forms['presetForm'].elements['preset'];
 
 

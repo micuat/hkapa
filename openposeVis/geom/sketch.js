@@ -47,10 +47,10 @@ var s = function (p) {
     let particles = [];
 
     let terrain = {
-        tl: [300, 500],
-        tr: [1000, 500],
-        bl: [100, 600],
-        br: [1200, 600]
+        tl: [100, 550],
+        tr: [1100, 550],
+        bl: [-500, 690],
+        br: [1700, 690]
     }
 
     p.setup = function () {
@@ -263,13 +263,64 @@ var s = function (p) {
 
         pg.strokeWeight(2);
         pg.stroke(255);
-        pg.beginShape();
-        pg.vertex(terrain.tl[0], terrain.tl[1]);
-        pg.vertex(terrain.tr[0], terrain.tr[1]);
-        pg.vertex(terrain.br[0], terrain.br[1]);
-        pg.vertex(terrain.bl[0], terrain.bl[1]);
-        pg.vertex(terrain.tl[0], terrain.tl[1]);
-        pg.endShape();
+        let gridN = 12;
+        let gridMatrix = [];
+        for (let i = 0; i <= gridN; i++) {
+            gridMatrix[i] = [];
+            for (let j = 0; j <= gridN; j++) {
+                let x0 = p.lerp(terrain.tl[0], terrain.tr[0], i / gridN);
+                let y0 = p.lerp(terrain.tl[1], terrain.tr[1], i / gridN);
+                let x1 = p.lerp(terrain.bl[0], terrain.br[0], i / gridN);
+                let y1 = p.lerp(terrain.bl[1], terrain.br[1], i / gridN);
+                let x = p.lerp(x0, x1, j / gridN);
+                let y = p.lerp(y0, y1, j / gridN);
+                let n = p.noise(t * 1 + y * 0.1, x * 0.1);
+                let amp = 0;
+                if (jsonUi.sliders != undefined) {
+                    amp = jsonUi.sliders[6] * 0.1;
+                }
+                y += -amp * EasingFunctions.easeInQuint(n);
+                gridMatrix[i][j] = { x: x, y: y };
+            }
+        }
+
+        for (let i = 0; i <= gridN; i++) {
+            pg.beginShape();
+            for (let j = 0; j <= gridN; j++) {
+                let g = gridMatrix[i][j];
+                pg.vertex(g.x, g.y);
+            }
+            pg.endShape();
+            pg.beginShape();
+            for (let j = 0; j <= gridN; j++) {
+                let g = gridMatrix[j][i];
+                pg.vertex(g.x, g.y);
+            }
+            pg.endShape();
+        }
+        // for (let i = 0; i <= gridN; i++) {
+        //     {
+        //         let x0 = p.lerp(terrain.tl[0], terrain.tr[0], i / gridN);
+        //         let y0 = p.lerp(terrain.tl[1], terrain.tr[1], i / gridN);
+        //         let x1 = p.lerp(terrain.bl[0], terrain.br[0], i / gridN);
+        //         let y1 = p.lerp(terrain.bl[1], terrain.br[1], i / gridN);
+        //         pg.line(x0, y0, x1, y1);
+        //     }
+        //     {
+        //         let x0 = p.lerp(terrain.tl[0], terrain.bl[0], i / gridN);
+        //         let y0 = p.lerp(terrain.tl[1], terrain.bl[1], i / gridN);
+        //         let x1 = p.lerp(terrain.tr[0], terrain.br[0], i / gridN);
+        //         let y1 = p.lerp(terrain.tr[1], terrain.br[1], i / gridN);
+        //         pg.line(x0, y0, x1, y1);
+        //     }
+        // }
+        // pg.beginShape();
+        // pg.vertex(terrain.tl[0], terrain.tl[1]);
+        // pg.vertex(terrain.tr[0], terrain.tr[1]);
+        // pg.vertex(terrain.br[0], terrain.br[1]);
+        // pg.vertex(terrain.bl[0], terrain.bl[1]);
+        // pg.vertex(terrain.tl[0], terrain.tl[1]);
+        // pg.endShape();
 
         pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
