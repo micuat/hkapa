@@ -188,7 +188,7 @@ var s = function (p) {
         for(let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
             if(jsonUi.sliders != undefined)
-                smoothedAmps[i] = p.lerp(0.5, smoothedAmps[i], jsonUi.sliders[3]/1000.0);
+                smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliders[3]/1000.0);
         }
         let lineColor = { r: 255, g: 255, b: 255 };
         // let lineColor = { r: 255, g: 255-amp*255, b: 255-amp*255 };
@@ -269,12 +269,12 @@ var s = function (p) {
                 for (let j = 0; j < pairs.length; j++) {
                     let staebeType = staebePairToType[j];
                     let l = L * staebeLengths[staebeType];
-                    if(staebeType == 0) {
-                        l *= p.constrain(smoothedAmps[0] * 2+0.5, 0.5, 1.5);
-                    }
-                    if(staebeType == 1) {
-                        l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
-                    }
+                    // if(staebeType == 0) {
+                    //     l *= p.constrain(smoothedAmps[0] * 2+0.5, 0.5, 1.5);
+                    // }
+                    // if(staebeType == 1) {
+                    //     l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
+                    // }
                     let alpha = fadeIn * 255;
                     if(staebeLengths[staebeType] == 0) {
                         alpha = 0;
