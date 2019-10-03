@@ -258,7 +258,6 @@ var s = function (p) {
                     continue;
                 }
                 let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
-                pg.stroke(lineColor.r, lineColor.g, lineColor.b, fadeIn * 255);
 
                 let L = 1;
                 if (staebeLineFade) {
@@ -276,6 +275,12 @@ var s = function (p) {
                     if(staebeType == 1) {
                         l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
                     }
+                    let alpha = fadeIn * 255;
+                    if(staebeLengths[staebeType] == 0) {
+                        alpha = 0;
+                    }
+                    pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
+
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
                     let x0 = trace[k][i0].x;
