@@ -47,7 +47,7 @@ const presets = {
 	armOnBlack: { sliders: [500, 0, 0, 0, 1000, 0, 0, 1000, 0, 0], duration: 3},
 	armOnVideo: { sliders: [500, 0, 0, 0, 0, 0, 0, 0, 0, 0], duration: 8},
 	armAndLeg: { sliders: [500, 400, 0, 0, 0, 0, 0, 0, 0, 0], duration: 1},
-	all: { sliders: [500, 400, 400, 0, 0, 0, 0, 0, 0, 0], duration: 1},
+	all: { sliders: [500, 200, 200, 0, 0, 0, 0, 0, 0, 0], duration: 1},
 	keith: { sliders: [0, 200, 300, 0, 1000, 0, 0, 0, 0, 0], duration: 1}
 };
 
