@@ -38,7 +38,8 @@ ws.onopen = function (event) {
 };
 
 
-const sliderValues = new Array(8);
+const numSliders = 9;
+const sliderValues = new Array(9);
 const presets = {
 	armOnBlack: [200, 0, 0, 0, 1000, 0, 0, 0],
 	armOnVideo: [400, 0, 0, 0, 0, 0, 0, 0],
@@ -47,7 +48,6 @@ const presets = {
 	keith: [0, 200, 300, 0, 1000, 0, 0, 0]
 };
 
-const numSliders = 8;
 let radios = document.forms['presetForm'].elements['preset'];
 
 

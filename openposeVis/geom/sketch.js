@@ -3,10 +3,10 @@ function Particle(p, pg) {
     let v = p5.Vector.random2D();
     // this.vel = {x: -5, y: 5};
     this.z = p.random(0.5, 3);
-    this.vel = { x: 5/this.z * v.x, y: 5/this.z * v.y };
+    this.vel = { x: 5 / this.z * v.x, y: 5 / this.z * v.y };
     this.rot = 0;
     this.rVel = (Math.random() - 0.5) * 0.3;
-    this.l = 200/this.z;
+    this.l = 200 / this.z;
     this.update = function (l) {
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
@@ -49,15 +49,15 @@ var s = function (p) {
 
     let terrainBottom = {
         tl: [100, 550],
-        tr: [1100, 550],
+        tr: [1180, 550],
         bl: [-500, 690],
-        br: [1700, 690]
+        br: [1780, 690]
     }
     let terrainWall = {
-        tl: [100, 550],
-        tr: [1100, 550],
-        bl: [100, 100],
-        br: [1100, 100]
+        tl: [640 - 250, 600],
+        tr: [640 + 250, 600],
+        bl: [640 - 250, 100],
+        br: [640 + 250, 100]
     }
 
     p.setup = function () {
@@ -208,6 +208,61 @@ var s = function (p) {
         }
     }
 
+    p.drawTerrain = function (jsonUi, t) {
+        let pg = p.renderPg;
+        let terrainAlpha = 0;
+        if (jsonUi.sliders != undefined) {
+            terrainAlpha = jsonUi.sliders[8] / 1000.0 * 255.0;
+        }
+        pg.strokeWeight(2);
+        pg.stroke(255);
+        let gridN = 12;
+        let gridMatrix = [];
+        let terrain = {};
+        for (let key in terrainBottom) {
+            let pl = 0;
+            if (jsonUi.sliders != undefined) {
+                pl = jsonUi.sliders[7] * 0.001;
+            }
+            let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
+            let y = p.lerp(terrainBottom[key][1], terrainWall[key][1], pl);
+            terrain[key] = [x, y];
+        }
+        for (let i = 0; i <= gridN; i++) {
+            gridMatrix[i] = [];
+            for (let j = 0; j <= gridN; j++) {
+                let x0 = p.lerp(terrain.tl[0], terrain.tr[0], i / gridN);
+                let y0 = p.lerp(terrain.tl[1], terrain.tr[1], i / gridN);
+                let x1 = p.lerp(terrain.bl[0], terrain.br[0], i / gridN);
+                let y1 = p.lerp(terrain.bl[1], terrain.br[1], i / gridN);
+                let x = p.lerp(x0, x1, j / gridN);
+                let y = p.lerp(y0, y1, j / gridN);
+                let n = p.noise(t * 1 + y * 0.1, x * 0.1);
+                let amp = 0;
+                if (jsonUi.sliders != undefined) {
+                    amp = jsonUi.sliders[6] * 0.1;
+                }
+                y += -amp * EasingFunctions.easeInQuint(n);
+                gridMatrix[i][j] = { x: x, y: y };
+            }
+        }
+        pg.stroke(255, terrainAlpha);
+        for (let i = 0; i <= gridN; i++) {
+            pg.beginShape();
+            for (let j = 0; j <= gridN; j++) {
+                let g = gridMatrix[i][j];
+                pg.vertex(g.x, g.y);
+            }
+            pg.endShape();
+            pg.beginShape();
+            for (let j = 0; j <= gridN; j++) {
+                let g = gridMatrix[j][i];
+                pg.vertex(g.x, g.y);
+            }
+            pg.endShape();
+        }
+    }
+
     p.draw = function () {
         let t = p.millis() * 0.001;
         let tw = t % 2;
@@ -262,76 +317,7 @@ var s = function (p) {
         pg.scale(p.width / 1280.0, p.height / 720.0);
         let staebeCount = 0;
 
-        pg.strokeWeight(2);
-        pg.stroke(255);
-        let gridN = 12;
-        let gridMatrix = [];
-        let terrain = {};
-        for (let key in terrainBottom) {
-            let pl = 0;
-            if (jsonUi.sliders != undefined) {
-                pl = jsonUi.sliders[7] * 0.001;
-            }
-            let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
-            let y = p.lerp(terrainBottom[key][1], terrainWall[key][1], pl);
-            terrain[key] = [x, y];
-        }
-        for (let i = 0; i <= gridN; i++) {
-            gridMatrix[i] = [];
-            for (let j = 0; j <= gridN; j++) {
-                let x0 = p.lerp(terrain.tl[0], terrain.tr[0], i / gridN);
-                let y0 = p.lerp(terrain.tl[1], terrain.tr[1], i / gridN);
-                let x1 = p.lerp(terrain.bl[0], terrain.br[0], i / gridN);
-                let y1 = p.lerp(terrain.bl[1], terrain.br[1], i / gridN);
-                let x = p.lerp(x0, x1, j / gridN);
-                let y = p.lerp(y0, y1, j / gridN);
-                let n = p.noise(t * 1 + y * 0.1, x * 0.1);
-                let amp = 0;
-                if (jsonUi.sliders != undefined) {
-                    amp = jsonUi.sliders[6] * 0.1;
-                }
-                y += -amp * EasingFunctions.easeInQuint(n);
-                gridMatrix[i][j] = { x: x, y: y };
-            }
-        }
-
-        for (let i = 0; i <= gridN; i++) {
-            pg.beginShape();
-            for (let j = 0; j <= gridN; j++) {
-                let g = gridMatrix[i][j];
-                pg.vertex(g.x, g.y);
-            }
-            pg.endShape();
-            pg.beginShape();
-            for (let j = 0; j <= gridN; j++) {
-                let g = gridMatrix[j][i];
-                pg.vertex(g.x, g.y);
-            }
-            pg.endShape();
-        }
-        // for (let i = 0; i <= gridN; i++) {
-        //     {
-        //         let x0 = p.lerp(terrain.tl[0], terrain.tr[0], i / gridN);
-        //         let y0 = p.lerp(terrain.tl[1], terrain.tr[1], i / gridN);
-        //         let x1 = p.lerp(terrain.bl[0], terrain.br[0], i / gridN);
-        //         let y1 = p.lerp(terrain.bl[1], terrain.br[1], i / gridN);
-        //         pg.line(x0, y0, x1, y1);
-        //     }
-        //     {
-        //         let x0 = p.lerp(terrain.tl[0], terrain.bl[0], i / gridN);
-        //         let y0 = p.lerp(terrain.tl[1], terrain.bl[1], i / gridN);
-        //         let x1 = p.lerp(terrain.tr[0], terrain.br[0], i / gridN);
-        //         let y1 = p.lerp(terrain.tr[1], terrain.br[1], i / gridN);
-        //         pg.line(x0, y0, x1, y1);
-        //     }
-        // }
-        // pg.beginShape();
-        // pg.vertex(terrain.tl[0], terrain.tl[1]);
-        // pg.vertex(terrain.tr[0], terrain.tr[1]);
-        // pg.vertex(terrain.br[0], terrain.br[1]);
-        // pg.vertex(terrain.bl[0], terrain.bl[1]);
-        // pg.vertex(terrain.tl[0], terrain.tl[1]);
-        // pg.endShape();
+        p.drawTerrain(jsonUi, t);
 
         pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
@@ -365,7 +351,7 @@ var s = function (p) {
             pg.pushStyle();
             let fadeIn = Math.min(1, smoothedPose.bornCount * 0.05);
             let fadeOut = p.map(smoothedPose.disappearCount, 0, disappearMax, 1, 0);
-            
+
             pg.noStroke();
             pg.fill(255, fadeIn * fadeOut * 255);
             if (showPoints) {
