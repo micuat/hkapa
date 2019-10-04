@@ -1,3 +1,78 @@
+function Pathfinder(p) {
+    this.x = 0;
+    this.y = 0;
+    this.target = {
+        x: 0,
+        y: 0,
+        sx: 0,
+        sy: 0,
+        rot: 0
+    }
+    this.orig = {
+        x: 0,
+        y: 0,
+        sx: 0,
+        sy: 0,
+        rot: 0
+    }
+    this.cycle = 0.5;
+    this.lastT = -100;
+    this.tick = 50 / 1.2;
+    this.draw = function (pg, t) {
+        if (Math.floor(t / this.cycle) - Math.floor(this.lastT) > 0) {
+            this.lastT = t / this.cycle;
+            this.orig = this.target;
+            this.target = {
+                x: this.orig.x,
+                y: this.orig.y,
+                sx: this.orig.sx,
+                sy: this.orig.sy,
+                rot: this.orig.rot
+            }
+            let rand = Math.random();
+            if (rand > 0.8) {
+                this.target.x = Math.floor(p.random(-5, 6));
+            }
+            else if (rand > 0.6) {
+                this.target.y = Math.floor(p.random(-5, 6));
+            }
+            else if (rand > 0.4) {
+                this.target.sx = Math.floor(p.random(0, 4));
+            }
+            else if (rand > 0.2) {
+                this.target.sy = Math.floor(p.random(0, 4));
+            }
+            else {
+                this.target.rot = Math.floor(p.random(0, 4));
+            }
+        }
+        let tw = EasingFunctions.easeInOutCubic(t / this.cycle - this.lastT);
+        this.x = p.lerp(this.orig.x, this.target.x, tw);
+        this.y = p.lerp(this.orig.y, this.target.y, tw);
+        this.sx = p.lerp(this.orig.sx, this.target.sx, tw);
+        this.sy = p.lerp(this.orig.sy, this.target.sy, tw);
+        this.rot = p.lerp(this.orig.rot, this.target.rot, tw);
+        let r = 10;
+        pg.pushStyle();
+        pg.pushMatrix();
+        pg.translate(1280 / 2, 720 / 2);
+        pg.fill(190, 249, 243);
+        pg.noStroke();
+        pg.translate(this.x * this.tick, this.y * this.tick);
+        pg.rotate(this.rot * Math.PI * 0.5);
+        pg.ellipse((+this.sx) * this.tick, (+this.sy) * this.tick, r, r);
+        pg.ellipse((-this.sx) * this.tick, (+this.sy) * this.tick, r, r);
+        pg.ellipse((-this.sx) * this.tick, (-this.sy) * this.tick, r, r);
+        pg.ellipse((+this.sx) * this.tick, (-this.sy) * this.tick, r, r);
+
+        pg.stroke(255);
+        pg.noFill();
+        pg.rect(-this.sx * this.tick, -this.sy * this.tick, this.sx * 2 * this.tick, this.sy * 2 * this.tick);
+        pg.popMatrix();
+        pg.popStyle();
+    }
+}
+
 function Particle(p, pg) {
     this.pos = { x: Math.random() * pg.width, y: Math.random() * pg.height };
     let v = p5.Vector.random2D();
@@ -54,11 +129,12 @@ var s = function (p) {
         br: [1780, 690]
     }
     let terrainWall = {
-        tl: [640 - 250, 600],
-        tr: [640 + 250, 600],
-        bl: [640 - 250, 100],
-        br: [640 + 250, 100]
+        tl: [640 - 250, 360 + 250],
+        tr: [640 + 250, 360 + 250],
+        bl: [640 - 250, 360 - 250],
+        br: [640 + 250, 360 - 250]
     }
+    let pathfinder = new Pathfinder(p);
 
     p.setup = function () {
         // p.createCanvas(1920, 1080);
@@ -210,9 +286,13 @@ var s = function (p) {
 
     p.drawTerrain = function (jsonUi, t) {
         let pg = p.renderPg;
-        let terrainAlpha = 0;
+        let terrainAlpha = 255;
+        // if (jsonUi.sliders != undefined) {
+        //     terrainAlpha = jsonUi.sliders[8] / 1000.0 * 255.0;
+        // }
+        let terrainConnect = 0;
         if (jsonUi.sliders != undefined) {
-            terrainAlpha = jsonUi.sliders[8] / 1000.0 * 255.0;
+            terrainConnect = jsonUi.sliders[8] / 1000.0 * 0.5;
         }
         pg.strokeWeight(2);
         pg.stroke(255);
@@ -224,8 +304,8 @@ var s = function (p) {
             if (jsonUi.sliders != undefined) {
                 pl = jsonUi.sliders[7] * 0.001;
             }
-            let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
-            let y = p.lerp(terrainBottom[key][1], terrainWall[key][1], pl);
+            let x = p.lerp(terrainWall[key][0], terrainBottom[key][0], pl);
+            let y = p.lerp(terrainWall[key][1], terrainBottom[key][1], pl);
             terrain[key] = [x, y];
         }
         for (let i = 0; i <= gridN; i++) {
@@ -247,19 +327,31 @@ var s = function (p) {
             }
         }
         pg.stroke(255, terrainAlpha);
+        if (terrainConnect == 0) return;
         for (let i = 0; i <= gridN; i++) {
-            pg.beginShape();
-            for (let j = 0; j <= gridN; j++) {
-                let g = gridMatrix[i][j];
-                pg.vertex(g.x, g.y);
+            let l = terrainConnect;
+            for (let j = 0; j < gridN; j++) {
+                let g0 = gridMatrix[i][j];
+                let g1 = gridMatrix[i][j + 1];
+                let x1 = p.lerp(g0.x, g1.x, l);
+                let y1 = p.lerp(g0.y, g1.y, l);
+                pg.line(g0.x, g0.y, x1, y1);
+
+                x1 = p.lerp(g0.x, g1.x, 1 - l);
+                y1 = p.lerp(g0.y, g1.y, 1 - l);
+                pg.line(g1.x, g1.y, x1, y1);
             }
-            pg.endShape();
-            pg.beginShape();
-            for (let j = 0; j <= gridN; j++) {
-                let g = gridMatrix[j][i];
-                pg.vertex(g.x, g.y);
+            for (let j = 0; j < gridN; j++) {
+                let g0 = gridMatrix[j][i];
+                let g1 = gridMatrix[j + 1][i];
+                let x1 = p.lerp(g0.x, g1.x, l);
+                let y1 = p.lerp(g0.y, g1.y, l);
+                pg.line(g0.x, g0.y, x1, y1);
+
+                x1 = p.lerp(g0.x, g1.x, 1 - l);
+                y1 = p.lerp(g0.y, g1.y, 1 - l);
+                pg.line(g1.x, g1.y, x1, y1);
             }
-            pg.endShape();
         }
     }
 
@@ -318,6 +410,8 @@ var s = function (p) {
         let staebeCount = 0;
 
         p.drawTerrain(jsonUi, t);
+
+        pathfinder.draw(pg, t);
 
         pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
