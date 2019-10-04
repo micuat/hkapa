@@ -5,10 +5,10 @@ ws.onopen = function (event) {
 		radios[i].onclick = function () {
 			const preset = presets[this.value];
 			for (let j = 0; j < numSliders; j++) {
-				TweenLite.to(document.getElementById('slide' + j), 1, { value: preset[j], autoAlpha: 0, ease: Power4.easeInOut });
+				TweenLite.to(document.getElementById('slide' + j), 3, { value: preset[j], autoAlpha: 0, ease: Power2.easeInOut });
 			}
 			let count = 0;
-			let maxCount = 100;
+			let maxCount = 300;
 			let interval = setInterval(function () {
 				for (let j = 0; j < numSliders; j++) {
 					sliderValues[j] = document.getElementById('slide' + j).value;
@@ -38,8 +38,8 @@ ws.onopen = function (event) {
 };
 
 
-const numSliders = 9;
-const sliderValues = new Array(9);
+const numSliders = 10;
+const sliderValues = new Array(numSliders);
 const presets = {
 	armOnBlack: [200, 0, 0, 0, 1000, 0, 0, 0],
 	armOnVideo: [400, 0, 0, 0, 0, 0, 0, 0],

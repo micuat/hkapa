@@ -3,9 +3,9 @@ function Ring(x, y) {
     this.y = y;
     this.count = 0;
     this.maxCount = 30;
-    this.draw = function (pg) {
-        let r = 10 + this.count * 2;
-        let alpha = (this.maxCount - this.count) / this.maxCount;
+    this.draw = function (pg, pathfinderDraw) {
+        let r = 10 + this.count * 0.5;
+        let alpha = pathfinderDraw * (this.maxCount - this.count) / this.maxCount;
         pg.stroke(255, alpha * 255);
         pg.ellipse(this.x, this.y, r, r);
         this.count++;
@@ -36,7 +36,12 @@ function Pathfinder(p) {
     this.lastT = -100;
     this.tick = 50 / 1.2;
     this.rings = [];
-    this.draw = function (pg, t) {
+    this.draw = function (jsonUi, pg, t) {
+        let pathfinderDraw = 0;
+        if (jsonUi.sliders != undefined) {
+            pathfinderDraw = jsonUi.sliders[9] / 1000.0;
+        }
+        if (pathfinderDraw == 0) return;
         if (Math.floor(t / this.cycle) - Math.floor(this.lastT) > 0) {
             if (this.target.rot % 2 == 0) {
                 this.rings.push(new Ring((this.target.x + this.target.sx) * this.tick, (this.target.y + this.target.sy) * this.tick));
@@ -88,12 +93,12 @@ function Pathfinder(p) {
         pg.translate(1280 / 2, 720 / 2);
 
         for (let i = this.rings.length - 1; i >= 0; i--) {
-            if (this.rings[i].draw(pg)) {
+            if (this.rings[i].draw(pg, pathfinderDraw)) {
                 this.rings.splice(i, 1);
             }
         }
 
-        pg.fill(190, 249, 243);
+        pg.fill(190, 249, 243, 255 * pathfinderDraw);
         pg.noStroke();
         pg.translate(this.x * this.tick, this.y * this.tick);
         pg.rotate(this.rot * Math.PI * 0.5);
@@ -102,7 +107,7 @@ function Pathfinder(p) {
         pg.ellipse((-this.sx) * this.tick, (-this.sy) * this.tick, r, r);
         pg.ellipse((+this.sx) * this.tick, (-this.sy) * this.tick, r, r);
 
-        pg.stroke(255);
+        pg.stroke(255, 255 * pathfinderDraw);
         pg.noFill();
         pg.rect(-this.sx * this.tick, -this.sy * this.tick, this.sx * 2 * this.tick, this.sy * 2 * this.tick);
         pg.popMatrix();
@@ -448,7 +453,7 @@ var s = function (p) {
 
         p.drawTerrain(jsonUi, t);
 
-        pathfinder.draw(pg, t);
+        pathfinder.draw(jsonUi, pg, t);
 
         pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
