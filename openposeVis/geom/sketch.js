@@ -329,12 +329,12 @@ var s = function (p) {
     p.drawTerrain = function (jsonUi, t) {
         let pg = p.renderPg;
         let terrainAlpha = 255;
-        // if (jsonUi.sliders != undefined) {
-        //     terrainAlpha = jsonUi.sliders[8] / 1000.0 * 255.0;
-        // }
         let terrainConnect = 0;
         if (jsonUi.sliders != undefined) {
             terrainConnect = jsonUi.sliders[8] / 1000.0 * 0.5;
+            if (jsonUi.sliders[8] < 10) {
+                terrainAlpha *= jsonUi.sliders[8] * 0.1;
+            }
         }
         pg.strokeWeight(2);
         pg.stroke(255);
@@ -517,8 +517,8 @@ var s = function (p) {
                         continue;
                     }
                     let alpha = fadeIn * fadeOut * 255;
-                    if (staebeLengths[staebeType] == 0) {
-                        alpha = 0;
+                    if (staebeLengths[staebeType] < 0.1) {
+                        alpha *= staebeLengths[staebeType] * 10;
                     }
                     alpha *= (k / trace.length);
                     pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
