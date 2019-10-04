@@ -86,8 +86,8 @@ public String jsonUiString = "{}";
  * init
  */
 void setup() {
-  size(1280, 720);
-  //fullScreen();
+  //size(1280, 720);
+  fullScreen();
   //fullScreen(2);
   frame = (JFrame)((PSurfaceAWT.SmoothCanvas) getSurface().getNative()).getFrame();
   frame.removeNotify();

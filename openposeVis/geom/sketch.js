@@ -2,11 +2,12 @@ function Particle(p, pg) {
     this.pos = { x: Math.random() * pg.width, y: Math.random() * pg.height };
     let v = p5.Vector.random2D();
     // this.vel = {x: -5, y: 5};
-    this.vel = { x: 5 * v.x, y: 5 * v.y };
+    this.z = p.random(0.5, 3);
+    this.vel = { x: 5/this.z * v.x, y: 5/this.z * v.y };
     this.rot = 0;
     this.rVel = (Math.random() - 0.5) * 0.3;
-    this.l = 100;
-    this.update = function () {
+    this.l = 200/this.z;
+    this.update = function (l) {
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
         let w = 1280, h = 720;
@@ -17,10 +18,10 @@ function Particle(p, pg) {
         this.rot += this.rVel;
         let dx = Math.cos(this.rot);
         let dy = Math.sin(this.rot);
-        this.x0 = this.pos.x + dx * -this.l * 0.5;
-        this.y0 = this.pos.y + dy * -this.l * 0.5;
-        this.x1 = this.pos.x + dx * this.l * 0.5;
-        this.y1 = this.pos.y + dy * this.l * 0.5;
+        this.x0 = this.pos.x + dx * -this.l * 0.5 * l;
+        this.y0 = this.pos.y + dy * -this.l * 0.5 * l;
+        this.x1 = this.pos.x + dx * this.l * 0.5 * l;
+        this.y1 = this.pos.y + dy * this.l * 0.5 * l;
         // pg.stroke(255);
         // pg.line(this.x0, this.y0, this.x1, this.y1);
     }
@@ -245,10 +246,6 @@ var s = function (p) {
         pg.textSize(24)
         p.tracking();
 
-        for (let i = 0; i < particles.length; i++) {
-            particles[i].update();
-        }
-
         // if(p.frameCount % 30 == 0) {
         //     print(jsonUi.sliders[4])
         // }
@@ -412,6 +409,7 @@ var s = function (p) {
                     // let xp1 = p.noise(t * 0.5, xt1 * 0.01) * 0.5 * pg.width;
                     // let yp1 = p.noise(t * 0.5, yt1 * 0.01) * 0.5 * pg.height;
                     let pt = particles[(staebeCount++) % particles.length];
+                    pt.update(l);
                     let xp2 = pt.x0;
                     let yp2 = pt.y0;
                     let xp1 = pt.x1;
