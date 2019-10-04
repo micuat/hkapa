@@ -151,14 +151,15 @@ var s = function (p) {
     [5, 6],
     [2, 9],
     [5, 12],
-    [9, 10],
-    [12, 13],
-    [10, 11],
-    [13, 14],
+    [9, 10, 10, 11],
+    [12, 13, 13, 14],
+    [10, 11, 9, 10],
+    [13, 14, 12, 13],
     ];
     let flippedIndex = [0, 1, 5, 6, 7, 2, 3, 4,
         8, 12, 13, 14, 9, 10, 11, 16, 15, 18, 17,
         22, 23, 24, 19, 20, 21];
+    let staebePairToType = [0, 0, 0, 0, 2, 2, 1, 1, 1, 1];
 
     let smoothedPoses = [];
     let smoothedAmps = [0, 0, 0, 0];
@@ -179,8 +180,6 @@ var s = function (p) {
     let pathfinder = new Pathfinder(p);
 
     p.setup = function () {
-        // p.createCanvas(1920, 1080);
-        // p.createCanvas(1280, 720);
         p.frameRate(30);
 
         for (let i = 0; i < 100; i++) {
@@ -408,7 +407,6 @@ var s = function (p) {
 
         let showIds = false;
         let showPoints = false;
-        let staebePairToType = [0, 0, 0, 0, 2, 2, 1, 1, 1, 1];
         let staebeMaxLength = 5;
         let staebeLengths = [0, 0, 0];
         if (jsonUi.sliders != undefined) {
@@ -495,16 +493,18 @@ var s = function (p) {
                     pg.ellipse(sp[j].x, sp[j].y, 5, 5);
                 }
             }
+
+            function ofMap(x, a, b, c, d, is) {
+                let t = p.map(x, a, b, c, d);
+                if (is) {
+                    t = p.constrain(t, c, d);
+                }
+                return t;
+            }
             for (let j = 0; j < pairs.length; j++) {
                 let staebeType = staebePairToType[j];
                 for (let k = trace.length - 1; k >= 0; k--) {
                     let l = staebeLengths[staebeType];
-                    // if(staebeType == 0) {
-                    //     l *= p.constrain(smoothedAmps[0] * 2+0.5, 0.5, 1.5);
-                    // }
-                    // if(staebeType == 1) {
-                    //     l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
-                    // }
 
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
@@ -513,12 +513,29 @@ var s = function (p) {
                     let xt1 = trace[k][i1].x;
                     let yt1 = trace[k][i1].y;
 
+                    if (staebeType == 1) {
+                        let i2 = pairs[j][2];
+                        let i3 = pairs[j][3];
+                        let xt2 = trace[k][i2].x;
+                        let yt2 = trace[k][i2].y;
+                        let xt3 = trace[k][i3].x;
+                        let yt3 = trace[k][i3].y;
+
+                        let dAx = xt1 - xt0;
+                        let dAy = yt1 - yt0;
+                        let dBx = xt3 - xt2;
+                        let dBy = yt3 - yt2;
+                        let angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
+                        angle = Math.abs(angle);
+                        l *= ofMap(angle, Math.PI*0.25, Math.PI*0.5, 0, 1.5, true);
+                    }
+
                     if (isNaN(xt0) || isNaN(yt0) || isNaN(xt1) || isNaN(yt1)) {
                         continue;
                     }
                     let alpha = fadeIn * fadeOut * 255;
-                    if (staebeLengths[staebeType] < 0.1) {
-                        alpha *= staebeLengths[staebeType] * 10;
+                    if (l < 0.1) {
+                        alpha *= l * 10;
                     }
                     alpha *= (k / trace.length);
                     pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
@@ -547,21 +564,6 @@ var s = function (p) {
                     let y1 = p.lerp(yt1, yp1, particleLerp);
                     pg.line(x2, y2, x1, y1);
                     break;
-                }
-                function drawSpaghetti() {
-                    pg.noFill();
-                    pg.stroke(255);
-                    pg.beginShape();
-                    pg.curveVertex(trace[index][4].x, trace[index][4].y);
-                    pg.curveVertex(trace[index][4].x, trace[index][4].y);
-                    pg.curveVertex(trace[index][3].x, trace[index][3].y);
-                    pg.curveVertex(trace[index][2].x, trace[index][2].y);
-                    // pg.curveVertex(trace[index][1].x, trace[index][1].y);
-                    pg.curveVertex(trace[index][5].x, trace[index][5].y);
-                    pg.curveVertex(trace[index][6].x, trace[index][6].y);
-                    pg.curveVertex(trace[index][7].x, trace[index][7].y);
-                    pg.curveVertex(trace[index][7].x, trace[index][7].y);
-                    pg.endShape();
                 }
             }
             pg.popStyle();
