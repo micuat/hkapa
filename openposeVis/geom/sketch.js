@@ -9,11 +9,11 @@ function Particle(p, pg) {
     this.update = function () {
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
-        let w = 1920, h = 1080;
-        if (this.pos.x < -this.l) this.pos.x = w / 2 + this.l;
-        if (this.pos.x > w / 2 + this.l) this.pos.x = - this.l;
-        if (this.pos.y < -this.l) this.pos.y = h / 2 + this.l;
-        if (this.pos.y > h / 2 + this.l) this.pos.y = - this.l;
+        let w = 1280, h = 720;
+        if (this.pos.x < -this.l) this.pos.x = w + this.l;
+        if (this.pos.x > w + this.l) this.pos.x = - this.l;
+        if (this.pos.y < -this.l) this.pos.y = h + this.l;
+        if (this.pos.y > h + this.l) this.pos.y = - this.l;
         this.rot += this.rVel;
         let dx = Math.cos(this.rot);
         let dy = Math.sin(this.rot);
@@ -226,9 +226,6 @@ var s = function (p) {
                 staebeLengths[i] = jsonUi.sliders[i] / 1000 * staebeMaxLength;
             }
         }
-        let staebeLfo = false;
-        let staebeLineFade = true;
-        let showTrace = false;
         let lerping = 0.5;
 
         for (let i = 0; i < smoothedAmps.length; i++) {
@@ -278,7 +275,7 @@ var s = function (p) {
             if (jsonUi.sliders != undefined) {
                 pl = jsonUi.sliders[7] * 0.001;
             }
-        let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
+            let x = p.lerp(terrainBottom[key][0], terrainWall[key][0], pl);
             let y = p.lerp(terrainBottom[key][1], terrainWall[key][1], pl);
             terrain[key] = [x, y];
         }
@@ -370,40 +367,25 @@ var s = function (p) {
 
             pg.pushStyle();
             let fadeIn = Math.min(1, smoothedPose.bornCount * 0.05);
+            let fadeOut = p.map(smoothedPose.disappearCount, 0, disappearMax, 1, 0);
+            
             pg.noStroke();
-            pg.fill(255, fadeIn * 255);
+            pg.fill(255, fadeIn * fadeOut * 255);
             if (showPoints) {
                 for (let j = 0; j < sp.length; j++) {
                     pg.ellipse(sp[j].x, sp[j].y, 5, 5);
                 }
             }
-            for (let k = 0; k < trace.length; k++) {
-                if (showTrace == false && k != trace.length - 1) {
-                    continue;
-                }
-                let ktw = EasingFunctions.easeInOutCubic(k / trace.length);
-
-                let L = 1;
-                if (staebeLineFade) {
-                    L *= ktw;
-                }
-                if (staebeLfo) {
-                    L *= EasingFunctions.easeOutCubic(tw);
-                }
-                for (let j = 0; j < pairs.length; j++) {
-                    let staebeType = staebePairToType[j];
-                    let l = L * staebeLengths[staebeType];
+            for (let j = 0; j < pairs.length; j++) {
+                let staebeType = staebePairToType[j];
+                for (let k = trace.length - 1; k >= 0; k--) {
+                    let l = staebeLengths[staebeType];
                     // if(staebeType == 0) {
                     //     l *= p.constrain(smoothedAmps[0] * 2+0.5, 0.5, 1.5);
                     // }
                     // if(staebeType == 1) {
                     //     l *= p.constrain(smoothedAmps[2] * 5, 0.5, 1.5);
                     // }
-                    let alpha = fadeIn * 255;
-                    if (staebeLengths[staebeType] == 0) {
-                        alpha = 0;
-                    }
-                    pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
 
                     let i0 = pairs[j][0];
                     let i1 = pairs[j][1];
@@ -411,6 +393,17 @@ var s = function (p) {
                     let yt0 = trace[k][i0].y;
                     let xt1 = trace[k][i1].x;
                     let yt1 = trace[k][i1].y;
+
+                    if (isNaN(xt0) || isNaN(yt0) || isNaN(xt1) || isNaN(yt1)) {
+                        continue;
+                    }
+                    let alpha = fadeIn * fadeOut * 255;
+                    if (staebeLengths[staebeType] == 0) {
+                        alpha = 0;
+                    }
+                    alpha *= (k / trace.length);
+                    pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
+
                     let xt2 = p.lerp(xt1, xt0, l);
                     let yt2 = p.lerp(yt1, yt0, l);
 
@@ -433,6 +426,7 @@ var s = function (p) {
                     let x1 = p.lerp(xt1, xp1, particleLerp);
                     let y1 = p.lerp(yt1, yp1, particleLerp);
                     pg.line(x2, y2, x1, y1);
+                    break;
                 }
                 function drawSpaghetti() {
                     pg.noFill();
