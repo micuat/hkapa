@@ -1,3 +1,20 @@
+function Ring(x, y) {
+    this.x = x;
+    this.y = y;
+    this.count = 0;
+    this.maxCount = 30;
+    this.draw = function (pg) {
+        let r = 10 + this.count * 2;
+        let alpha = (this.maxCount - this.count) / this.maxCount;
+        pg.stroke(255, alpha * 255);
+        pg.ellipse(this.x, this.y, r, r);
+        this.count++;
+        if (this.count >= this.maxCount) {
+            return true;
+        }
+        else return false;
+    }
+}
 function Pathfinder(p) {
     this.x = 0;
     this.y = 0;
@@ -18,8 +35,21 @@ function Pathfinder(p) {
     this.cycle = 0.5;
     this.lastT = -100;
     this.tick = 50 / 1.2;
+    this.rings = [];
     this.draw = function (pg, t) {
         if (Math.floor(t / this.cycle) - Math.floor(this.lastT) > 0) {
+            if (this.target.rot % 2 == 0) {
+                this.rings.push(new Ring((this.target.x + this.target.sx) * this.tick, (this.target.y + this.target.sy) * this.tick));
+                this.rings.push(new Ring((this.target.x - this.target.sx) * this.tick, (this.target.y + this.target.sy) * this.tick));
+                this.rings.push(new Ring((this.target.x - this.target.sx) * this.tick, (this.target.y - this.target.sy) * this.tick));
+                this.rings.push(new Ring((this.target.x + this.target.sx) * this.tick, (this.target.y - this.target.sy) * this.tick));
+            }
+            else {
+                this.rings.push(new Ring((this.target.x + this.target.sy) * this.tick, (this.target.y + this.target.sx) * this.tick));
+                this.rings.push(new Ring((this.target.x - this.target.sy) * this.tick, (this.target.y + this.target.sx) * this.tick));
+                this.rings.push(new Ring((this.target.x - this.target.sy) * this.tick, (this.target.y - this.target.sx) * this.tick));
+                this.rings.push(new Ring((this.target.x + this.target.sy) * this.tick, (this.target.y - this.target.sx) * this.tick));
+            }
             this.lastT = t / this.cycle;
             this.orig = this.target;
             this.target = {
@@ -56,6 +86,13 @@ function Pathfinder(p) {
         pg.pushStyle();
         pg.pushMatrix();
         pg.translate(1280 / 2, 720 / 2);
+
+        for (let i = this.rings.length - 1; i >= 0; i--) {
+            if (this.rings[i].draw(pg)) {
+                this.rings.splice(i, 1);
+            }
+        }
+
         pg.fill(190, 249, 243);
         pg.noStroke();
         pg.translate(this.x * this.tick, this.y * this.tick);
