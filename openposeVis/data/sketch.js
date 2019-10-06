@@ -1,9 +1,36 @@
 let ws = new WebSocket('ws://localhost:8025/staebe');
 
-ws.onopen = function (event) {
-	for (let i = 0; i < radios.length; i++) {
-		radios[i].onclick = function () {
-			const preset = presets[this.value];
+const numSliders = 10;
+const sliderValues = new Array(numSliders);
+const presets = [
+	{ name: 'grid', sliders: [0, 0, 0, 0, 1000, 0, 0, 0, 200, 0], duration: 1 },
+	{ name: 'pfOnGrid', sliders: [0, 0, 0, 0, 1000, 0, 0, 0, 200, 1000], duration: 1 },
+	{ name: 'wandering', sliders: [200, 0, 0, 0, 1000, 1000, 0, 1000, 1000, 0], duration: 1 },
+	{ name: 'armOnBlack', sliders: [500, 0, 0, 0, 1000, 0, 0, 1000, 0, 0], duration: 3 },
+	{ name: 'armOnVideo', sliders: [500, 0, 0, 0, 0, 0, 0, 0, 0, 0], duration: 8 },
+	{ name: 'armAndLeg', sliders: [500, 400, 0, 0, 0, 0, 0, 0, 0, 0], duration: 1 },
+	{ name: 'all', sliders: [500, 200, 200, 0, 0, 0, 0, 0, 0, 0], duration: 1 },
+	{ name: 'keith', sliders: [0, 200, 300, 0, 1000, 0, 0, 0, 0, 0], duration: 1 }
+];
+
+// var app4 = new Vue({
+//   el: '#app-4',
+//   data: {
+// 		presets
+//   }
+// })
+
+new Vue({
+	el: '#app',
+	data: {
+		presets,
+		checked: '',
+	},
+	watch: {
+		checked: function (val) {
+			const preset = presets.filter(obj => {
+				return obj.name == val
+			})[0];
 			for (let j = 0; j < numSliders; j++) {
 				TweenLite.to(document.getElementById('slide' + j), preset.duration, { value: preset.sliders[j], autoAlpha: 0, ease: Power2.easeInOut });
 			}
@@ -22,9 +49,11 @@ ws.onopen = function (event) {
 					clearInterval(interval);
 				}
 			}, 10);
-		};
+		}
 	}
-	
+})
+
+ws.onopen = function (event) {
 	for (let i = 0; i < numSliders; i++) {
 		sliderValues[i] = 0;
 		document.getElementById('slide' + i).oninput = function () {
@@ -36,23 +65,6 @@ ws.onopen = function (event) {
 		}
 	}
 };
-
-
-const numSliders = 10;
-const sliderValues = new Array(numSliders);
-const presets = {
-	grid: { sliders: [0, 0, 0, 0, 1000, 0, 0, 0, 200, 0], duration: 1},
-	pfOnGrid: { sliders: [0, 0, 0, 0, 1000, 0, 0, 0, 200, 1000], duration: 1},
-	wandering: { sliders: [200, 0, 0, 0, 1000, 1000, 0, 1000, 1000, 0], duration: 1},
-	armOnBlack: { sliders: [500, 0, 0, 0, 1000, 0, 0, 1000, 0, 0], duration: 3},
-	armOnVideo: { sliders: [500, 0, 0, 0, 0, 0, 0, 0, 0, 0], duration: 8},
-	armAndLeg: { sliders: [500, 400, 0, 0, 0, 0, 0, 0, 0, 0], duration: 1},
-	all: { sliders: [500, 200, 200, 0, 0, 0, 0, 0, 0, 0], duration: 1},
-	keith: { sliders: [0, 200, 300, 0, 1000, 0, 0, 0, 0, 0], duration: 1}
-};
-
-let radios = document.forms['presetForm'].elements['preset'];
-
 
 setInterval(() => {
 	if (ws.readyState == WebSocket.CLOSED) {

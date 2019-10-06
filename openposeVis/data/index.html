@@ -2,165 +2,21 @@
 <html>
 <header>
 	<script src='TweenLite.min.js'></script>
-	<style>
-		html,
-		body {
-			margin: 0;
-			padding: 0;
-		}
-
-		canvas {
-			display: block;
-		}
-
-		.slidecontainer {
-			width: 800px;
-			/* z-index: 3; */
-			/* position: absolute; */
-			top: 0px;
-			left: 0px;
-		}
-
-		.slider {
-			-webkit-appearance: none;
-			width: 50%;
-			height: 50px;
-			background: #d3d3d3;
-			outline: none;
-			opacity: 0.4;
-			-webkit-transition: .2s;
-			transition: opacity .2s;
-		}
-
-		.slider:hover {
-			opacity: 1;
-		}
-
-		.slider::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			appearance: none;
-			width: 50px;
-			height: 50px;
-			background: #4CAF50;
-			cursor: pointer;
-		}
-
-		.slider::-moz-range-thumb {
-			width: 50px;
-			height: 50px;
-			background: #4CAF50;
-			cursor: pointer;
-		}
-
-		.slidecontainer label {
-			display: inline-block;
-			width: 140px;
-			text-align: right;
-		}
-
-		/* Customize the label (the container) */
-		.container {
-			display: block;
-			position: relative;
-			padding-left: 35px;
-			margin-bottom: 12px;
-			cursor: pointer;
-			font-size: 22px;
-			-webkit-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-		}
-
-		/* Hide the browser's default radio button */
-		.container input {
-			position: absolute;
-			opacity: 0;
-			cursor: pointer;
-			height: 0;
-			width: 0;
-		}
-
-		/* Create a custom radio button */
-		.checkmark {
-			position: absolute;
-			top: 0;
-			left: 0;
-			height: 25px;
-			width: 25px;
-			background-color: #eee;
-			border-radius: 50%;
-		}
-
-		/* On mouse-over, add a grey background color */
-		.container:hover input~.checkmark {
-			background-color: #ccc;
-		}
-
-		/* When the radio button is checked, add a blue background */
-		.container input:checked~.checkmark {
-			background-color: #4CAF50;
-		}
-
-		/* Create the indicator (the dot/circle - hidden when not checked) */
-		.checkmark:after {
-			content: "";
-			position: absolute;
-			display: none;
-		}
-
-		/* Show the indicator (dot/circle) when checked */
-		.container input:checked~.checkmark:after {
-			display: block;
-		}
-
-		/* Style the indicator (dot/circle) */
-		.container .checkmark:after {
-			top: 9px;
-			left: 9px;
-			width: 8px;
-			height: 8px;
-			border-radius: 50%;
-			background: white;
-		}
-	</style>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<link rel="stylesheet" href="style.css">
 </header>
 
 <body>
-	<form id="presetForm">
-		<label class="container">grid
-			<input type="radio" name="preset" value="grid">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">pf on grid
-			<input type="radio" name="preset" value="pfOnGrid">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">wandering
-			<input type="radio" name="preset" value="wandering">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">arm on black
-			<input type="radio" name="preset" value="armOnBlack">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">arm on video
-			<input type="radio" name="preset" value="armOnVideo">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">arm and leg
-			<input type="radio" name="preset" value="armAndLeg">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">all
-			<input type="radio" name="preset" value="all">
-			<span class="checkmark"></span>
-		</label>
-		<label class="container">keith
-			<input type="radio" name="preset" value="keith">
-			<span class="checkmark"></span>
-		</label>
-	</form>
+	<div id="app">
+		<ul>
+			<li v-for="preset in presets">
+				<input type="radio" v-model="checked" :value="preset.name"> {{ preset.name }}
+			</li>
+		</ul>
+
+		{{ checked }}
+	</div>
+
 	<div class="slidecontainer">
 		<div class="block">
 			<label>Arm Length</label>
