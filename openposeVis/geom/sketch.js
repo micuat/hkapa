@@ -36,11 +36,7 @@ function Pathfinder(p) {
     this.lastT = -100;
     this.tick = 50 / 1.2;
     this.rings = [];
-    this.draw = function (jsonUi, pg, t) {
-        let pathfinderDraw = 0;
-        if (jsonUi.sliders != undefined) {
-            pathfinderDraw = jsonUi.sliders[9] / 1000.0;
-        }
+    this.draw = function (pathfinderDraw, pg, t) {
         if (pathfinderDraw == 0) return;
         if (Math.floor(t / this.cycle) - Math.floor(this.lastT) > 0) {
             if (this.target.rot % 2 == 0) {
@@ -329,11 +325,9 @@ var s = function (p) {
         let pg = p.renderPg;
         let terrainAlpha = 255;
         let terrainConnect = 0;
-        if (jsonUi.sliders != undefined) {
-            terrainConnect = jsonUi.sliders[8] / 1000.0 * 0.5;
-            if (jsonUi.sliders[8] < 10) {
-                terrainAlpha *= jsonUi.sliders[8] * 0.1;
-            }
+        terrainConnect = jsonUi.sliderValues.terrainAlpha / 1000.0 * 0.5;
+        if (jsonUi.sliderValues.terrainAlpha < 10) {
+            terrainAlpha *= jsonUi.sliderValues.terrainAlpha * 0.1;
         }
         pg.strokeWeight(2);
         pg.stroke(255);
@@ -341,10 +335,7 @@ var s = function (p) {
         let gridMatrix = [];
         let terrain = {};
         for (let key in terrainBottom) {
-            let pl = 0;
-            if (jsonUi.sliders != undefined) {
-                pl = jsonUi.sliders[7] * 0.001;
-            }
+            let pl = jsonUi.sliderValues.terrainRot * 0.001;
             let x = p.lerp(terrainWall[key][0], terrainBottom[key][0], pl);
             let y = p.lerp(terrainWall[key][1], terrainBottom[key][1], pl);
             terrain[key] = [x, y];
@@ -360,9 +351,7 @@ var s = function (p) {
                 let y = p.lerp(y0, y1, j / gridN);
                 let n = p.noise(t * 1 + y * 0.1, x * 0.1);
                 let amp = 0;
-                if (jsonUi.sliders != undefined) {
-                    amp = jsonUi.sliders[6] * 0.1;
-                }
+                amp = jsonUi.sliderValues.terrainNoise * 0.1;
                 y += -amp * EasingFunctions.easeInQuint(n);
                 gridMatrix[i][j] = { x: x, y: y };
             }
@@ -404,26 +393,26 @@ var s = function (p) {
         p.fft.analyze();
 
         let jsonUi = JSON.parse(p.jsonUiString);
+        if(p.frameCount % 30 == 0) {
+            print(jsonUi.sliderValues.armLength)
+        }
+        if(jsonUi.sliderValues == undefined)
+            return;
 
         let showIds = false;
         let showPoints = false;
         let staebeMaxLength = 5;
         let staebeLengths = [0, 0, 0];
-        if (jsonUi.sliders != undefined) {
-            for (let i = 0; i < 3; i++) {
-                staebeLengths[i] = jsonUi.sliders[i] / 1000 * staebeMaxLength;
-            }
-        }
+        staebeLengths[0] = jsonUi.sliderValues.armLength / 1000 * staebeMaxLength;
+        staebeLengths[1] = jsonUi.sliderValues.legLength / 1000 * staebeMaxLength;
+        staebeLengths[2] = jsonUi.sliderValues.spineLength / 1000 * staebeMaxLength;
         let lerping = 0.5;
 
         for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
-            if (jsonUi.sliders != undefined) {
-                smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliders[3] / 1000.0);
-            }
+            smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliderValues.audioReactive / 1000.0);
         }
         let lineColor = { r: 255, g: 255, b: 255 };
-        // let lineColor = { r: 255, g: 255-amp*255, b: 255-amp*255 };
 
         this.lerping = lerping;
 
@@ -433,12 +422,7 @@ var s = function (p) {
         pg.textSize(24)
         p.tracking();
 
-        // if(p.frameCount % 30 == 0) {
-        //     print(jsonUi.sliders[4])
-        // }
-        if (jsonUi.sliders != undefined) {
-            pg.background(0, 0, 0, jsonUi.sliders[4] / 1000.0 * 255);
-        }
+        pg.background(0, 0, 0, jsonUi.sliderValues.background / 1000.0 * 255);
 
         pg.strokeWeight(1);
         pg.noFill();
@@ -451,7 +435,7 @@ var s = function (p) {
 
         p.drawTerrain(jsonUi, t);
 
-        pathfinder.draw(jsonUi, pg, t);
+        pathfinder.draw(jsonUi.sliderValues.pathfinder, pg, t);
 
         pg.strokeWeight(4);
         for (let i = 0; i < smoothedPoses.length; i++) {
@@ -555,9 +539,8 @@ var s = function (p) {
                     let yp1 = pt.y1;
 
                     let particleLerp = 0;
-                    if (jsonUi.sliders != undefined) {
-                        particleLerp = jsonUi.sliders[5] / 1000.0;
-                    }
+                    particleLerp = jsonUi.sliders.wander / 1000.0;
+
                     let x2 = p.lerp(xt2, xp2, particleLerp);
                     let y2 = p.lerp(yt2, yp2, particleLerp);
                     let x1 = p.lerp(xt1, xp1, particleLerp);
