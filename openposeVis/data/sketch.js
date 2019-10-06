@@ -4,6 +4,12 @@ let ws = new WebSocket('ws://localhost:8025/staebe');
 const sliderValues = { armLength: 0, legLength: 0, spineLength: 0, audioReactive: 0, background: 0, wander: 0, terrainNoise: 0, terrainRot: 0, terrainAlpha: 0, pathfinder: 0 };
 const presets = [
 	{
+		name: 'blank',
+		display: 'Blank',
+		sliders: { ...sliderValues, ...{ background: 1000 } },
+		duration: 1
+	},
+	{
 		name: 'grid',
 		display: 'Grid',
 		sliders: { ...sliderValues, ...{ background: 1000, terrainAlpha: 200 } },
