@@ -7,10 +7,10 @@
 </header>
 
 <body>
-	<div id="app">
+	<div id="radioContainer">
 		<ul>
 			<li v-for="preset in presets">
-				<input type="radio" v-model="checked" :value="preset.name"> {{ preset.name }}
+				<input type="radio" v-model="checked" :value="preset.name"><label>{{ preset.display }}</label>
 			</li>
 		</ul>
 

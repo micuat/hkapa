@@ -5,41 +5,49 @@ const sliderValues = { armLength: 0, legLength: 0, spineLength: 0, audioReactive
 const presets = [
 	{
 		name: 'grid',
+		display: 'Grid',
 		sliders: {...sliderValues, ...{background: 1000, terrainAlpha: 200}},
 		duration: 1
 	},
 	{
 		name: 'pfOnGrid',
+		display: 'Pathfinder on Grid',
 		sliders: {...sliderValues, ...{background: 1000, terrainAlpha: 200, pathfinder: 1000}},
 		duration: 1
 	},
 	{
 		name: 'wandering',
+		display: 'Wandering',
 		sliders: {...sliderValues, ...{armLength: 200, background: 1000, wander: 1000, terrainRot: 1000, terrainAlpha: 1000}},
 		duration: 1
 	},
 	{
 		name: 'armOnBlack',
+		display: 'Arm on Black',
 		sliders: {...sliderValues, ...{armLength: 500, background: 1000, terrainRot: 1000}},
 		duration: 3
 	},
 	{
 		name: 'armOnVideo',
+		display: 'Arm on Video',
 		sliders: {...sliderValues, ...{armLength: 500, }},
 		duration: 8
 	},
 	{
 		name: 'armAndLeg',
+		display: 'Arm and Leg',
 		sliders: {...sliderValues, ...{armLength: 500, legLength: 400}},
 		duration: 1
 	},
 	{
 		name: 'all',
+		display: 'All',
 		sliders: {...sliderValues, ...{armLength: 500, legLength: 200, spineLength: 200}},
 		duration: 1
 	},
 	{
 		name: 'keith',
+		display: 'Keith',
 		sliders: {...sliderValues, ...{armLength: 0, legLength: 20, spineLength: 300, background: 1000}},
 		duration: 1
 	}
@@ -47,7 +55,7 @@ const presets = [
 const sliderKeys = Object.keys(presets[0].sliders);
 
 new Vue({
-	el: '#app',
+	el: '#radioContainer',
 	data: {
 		presets,
 		checked: 'none',
