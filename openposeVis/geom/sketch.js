@@ -393,11 +393,10 @@ var s = function (p) {
         p.fft.analyze();
 
         let jsonUi = JSON.parse(p.jsonUiString);
-        if(p.frameCount % 30 == 0) {
-            print(jsonUi.sliderValues.armLength)
-        }
-        if(jsonUi.sliderValues == undefined)
+
+        if(jsonUi.sliderValues == undefined) {
             return;
+        }
 
         let showIds = false;
         let showPoints = false;
