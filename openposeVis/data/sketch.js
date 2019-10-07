@@ -1,7 +1,7 @@
 let ws = new WebSocket('ws://localhost:8025/staebe');
 
 // const numSliders = 10;
-const sliderValues = { armLength: 0, legLength: 0, spineLength: 0, audioReactive: 0, background: 0, wander: 0, terrainNoise: 0, terrainRot: 0, terrainAlpha: 0, pathfinder: 0 };
+const sliderValues = { armLength: 0, legLength: 0, spineLength: 0, audioReactive: 0, background: 0, wander: 0, terrainNoise: 0, terrainRot: 0, terrainAlpha: 0, pathfinder: 0, duration: 0 };
 const presets = [
 	{
 		name: 'blank',
@@ -60,6 +60,16 @@ const presets = [
 ];
 const sliderKeys = Object.keys(presets[0].sliders);
 
+var gui = new dat.gui.GUI();
+gui.remember(sliderValues);
+for (let key of Object.keys(sliderValues))
+	gui.add(sliderValues, key).min(0).max(1000).listen().onChange(function (value) {
+		let params = { sliderValues };
+		if (ws.readyState == WebSocket.OPEN) {
+			ws.send(JSON.stringify(params));
+		}
+	});
+
 new Vue({
 	el: '#radioContainer',
 	data: {
@@ -71,53 +81,36 @@ new Vue({
 			const preset = presets.filter(obj => {
 				return obj.name == val
 			})[0];
-			for (let key of sliderKeys) {
-				TweenLite.to(document.getElementById(key), preset.duration, { value: preset.sliders[key], autoAlpha: 0, ease: Power2.easeInOut });
-			}
-			let count = 0;
-			let maxCount = preset.duration * 1000 / 10;
-			let interval = setInterval(function () {
-				for (let key of sliderKeys) {
-					sliderValues[key] = document.getElementById(key).value;
-				}
-				let params = { sliderValues };
-				if (ws.readyState == WebSocket.OPEN) {
-					ws.send(JSON.stringify(params));
-				}
-				count++;
-				if (count >= maxCount) {
-					clearInterval(interval);
-				}
-			}, 10);
+
+			easeTo(preset);
 		}
 	}
 });
+
+function easeTo(preset) {
+	TweenLite.to(sliderValues, preset.duration, { ...preset.sliders, ...{ ease: Power2.easeInOut, duration: preset.duration } });
+	let count = 0;
+	let maxCount = preset.duration * 1000 / 10;
+	let interval = setInterval(function () {
+		let params = { sliderValues };
+		if (ws.readyState == WebSocket.OPEN) {
+			ws.send(JSON.stringify(params));
+		}
+		count++;
+		if (count >= maxCount) {
+			clearInterval(interval);
+		}
+	}, 10);
+}
 
 const sliders = [];
 for (const key of sliderKeys) {
-	let result = key.replace( /([A-Z])/g, " $1" );
+	let result = key.replace(/([A-Z])/g, " $1");
 	let display = result.charAt(0).toUpperCase() + result.slice(1);
-	sliders.push({name: key, display: display})
+	sliders.push({ name: key, display: display })
 }
-new Vue({
-	el: '#slideContainer',
-	data: {
-		sliders,
-		checked: 'none',
-	}
-});
 
 ws.onopen = function (event) {
-	for (let key of sliderKeys) {
-		// sliderValues[i] = 0;
-		document.getElementById(key).oninput = function () {
-			sliderValues[key] = this.value;
-			let params = { sliderValues };
-			if (ws.readyState == WebSocket.OPEN) {
-				ws.send(JSON.stringify(params));
-			}
-		}
-	}
 };
 
 setInterval(() => {

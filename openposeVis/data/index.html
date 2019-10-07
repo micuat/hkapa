@@ -2,6 +2,7 @@
 <html>
 <header>
 	<script src='TweenLite.min.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<link rel="stylesheet" href="style.css">
 </header>
@@ -17,14 +18,6 @@
 
 		{{ checked }}
 	</div>
-
-	<div id="slideContainer">
-		<div v-for="key in sliders">
-			<label>{{ key.display }}</label>
-			<input type="range" min="0" max="1000" value="0" class="slider" :id="key.name">
-		</div>
-	</div>
-
 	<script src="sketch.js"></script>
 </body>
 
