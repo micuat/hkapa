@@ -43,9 +43,9 @@ const presets = [
 		name: 'wandering',
 		display: 'Wandering',
 		sliders: {
-			armLength: { val: 1, t: 1 },
+			armLength: { val: 1, t: 3 },
 			background: { val: 255, t: 1 },
-			wander: { val: 1, t: 1 },
+			wander: { val: 1, t: 1, ease: Power0.easeInOut },
 			terrainRot: { val: 1, t: 2 },
 			terrainAlpha: { val: 0.1, t: 2 },
 			pathfinder: { val: 0, t: 4 }
@@ -57,6 +57,7 @@ const presets = [
 		sliders: {
 			armLength: { val: 2.5, t: 3 },
 			background: { val: 255, t: 3 },
+			wander: { val: 0, t: 4, ease: Power0.easeInOut },
 			terrainRot: { val: 1, t: 3 }
 		}
 	},
@@ -120,6 +121,9 @@ function easeTo(preset) {
 		else {
 			let target = { ease: Power2.easeInOut };
 			target[key] = preset.sliders[key].val;
+			if (preset.sliders[key].ease != undefined) {
+				target.ease = preset.sliders[key].ease;
+			}
 			TweenLite.to(sliderValues, preset.sliders[key].t, target);
 		}
 	}

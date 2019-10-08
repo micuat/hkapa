@@ -120,7 +120,12 @@ function Particle(p, pg) {
     this.rot = 0;
     this.rVel = (Math.random() - 0.5) * 0.3;
     this.l = 200 / this.z;
+    this.toUpdate = true;
     this.update = function (l) {
+        if (this.toUpdate == false) {
+            return;
+        }
+        this.toUpdate = false;
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
         let w = 1280, h = 720;
@@ -306,6 +311,7 @@ var s = function (p) {
                     smoothedPoses[j].pose = pose;
                     smoothedPoses[j].disappearCount = 0;
                     smoothedPoses[j].bornCount = 0;
+                    smoothedPoses[j].randomId = Math.random();
 
                     sp = pose;
                     id = j;
@@ -313,7 +319,7 @@ var s = function (p) {
                 }
             }
             if (id < 0) {
-                smoothedPoses.push({ pose: pose, disappearCount: 0, bornCount: 0 })
+                smoothedPoses.push({ pose: pose, disappearCount: 0, bornCount: 0, randomId: Math.random() })
                 sp = pose;
                 id = smoothedPoses.length - 1;
             }
@@ -394,13 +400,12 @@ var s = function (p) {
 
         let jsonUi = JSON.parse(p.jsonUiString);
 
-        if(jsonUi.sliderValues == undefined) {
+        if (jsonUi.sliderValues == undefined) {
             return;
         }
 
         let showIds = false;
         let showPoints = false;
-        let staebeMaxLength = 5;
         let staebeLengths = [0, 0, 0];
         staebeLengths[0] = jsonUi.sliderValues.armLength;
         staebeLengths[1] = jsonUi.sliderValues.legLength;
@@ -410,6 +415,10 @@ var s = function (p) {
         for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
             smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliderValues.audioReactive);
+        }
+
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].toUpdate = true;
         }
         let lineColor = { r: 255, g: 255, b: 255 };
 
@@ -430,7 +439,6 @@ var s = function (p) {
 
         pg.pushMatrix();
         pg.scale(p.width / 1280.0, p.height / 720.0);
-        let staebeCount = 0;
 
         p.drawTerrain(jsonUi, t);
 
@@ -510,7 +518,7 @@ var s = function (p) {
                         let dBy = yt3 - yt2;
                         let angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
                         angle = Math.abs(angle);
-                        l *= ofMap(angle, Math.PI*0.25, Math.PI*0.5, 0, 1.5, true);
+                        l *= ofMap(angle, Math.PI * 0.25, Math.PI * 0.5, 0, 1.5, true);
                     }
 
                     if (isNaN(xt0) || isNaN(yt0) || isNaN(xt1) || isNaN(yt1)) {
@@ -526,11 +534,8 @@ var s = function (p) {
                     let xt2 = p.lerp(xt1, xt0, l);
                     let yt2 = p.lerp(yt1, yt0, l);
 
-                    // let xp2 = p.noise(t * 0.5, xt0 * 0.01) * 0.5 * pg.width;
-                    // let yp2 = p.noise(t * 0.5, yt0 * 0.01) * 0.5 * pg.height;
-                    // let xp1 = p.noise(t * 0.5, xt1 * 0.01) * 0.5 * pg.width;
-                    // let yp1 = p.noise(t * 0.5, yt1 * 0.01) * 0.5 * pg.height;
-                    let pt = particles[(staebeCount++) % particles.length];
+                    let particleIndex = Math.floor(smoothedPose.randomId * particles.length + j) % particles.length;
+                    let pt = particles[particleIndex];
                     pt.update(l);
                     let xp2 = pt.x0;
                     let yp2 = pt.y0;
@@ -538,7 +543,8 @@ var s = function (p) {
                     let yp1 = pt.y1;
 
                     let particleLerp = 0;
-                    particleLerp = jsonUi.sliderValues.wander;
+                    particleLerp = ofMap(jsonUi.sliderValues.wander, particleIndex / particles.length * 0.5, particleIndex / particles.length * 0.5 + 0.5, 0, 1, true);
+                    particleLerp = EasingFunctions.easeInOutCubic(particleLerp);
 
                     let x2 = p.lerp(xt2, xp2, particleLerp);
                     let y2 = p.lerp(yt2, yp2, particleLerp);
