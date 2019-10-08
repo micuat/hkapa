@@ -1,69 +1,92 @@
 let ws = new WebSocket('ws://localhost:8025/staebe');
 
-// const numSliders = 10;
-const sliderValues = { armLength: 0, legLength: 0, spineLength: 0, audioReactive: 0, background: 0, wander: 0, terrainNoise: 0, terrainRot: 0, terrainAlpha: 0, pathfinder: 0, duration: 0 };
+const sliderProperties = {
+	armLength: { min: 0, max: 5, default: 0 },
+	legLength: { min: 0, max: 5, default: 0 },
+	spineLength: { min: 0, max: 5, default: 0 },
+	audioReactive: { min: 0, max: 1, default: 0 },
+	background: { min: 0, max: 255, default: 255 }, // alpha
+	wander: { min: 0, max: 1, default: 0 },
+	terrainNoise: { min: 0, max: 100, default: 0 },
+	terrainRot: { min: 0, max: 1, default: 0 },
+	terrainAlpha: { min: 0, max: 0.5, default: 0 },
+	pathfinder: { min: 0, max: 1, default: 0 }
+};
+const sliderValues = {};
+for (const key in sliderProperties) {
+	sliderValues[key] = sliderProperties[key].default;
+}
 const presets = [
 	{
 		name: 'blank',
 		display: 'Blank',
-		sliders: { ...sliderValues, ...{ background: 1000 } },
-		duration: 1
+		sliders: { background: { val: 255, t: 1 } }
 	},
 	{
 		name: 'grid',
 		display: 'Grid',
-		sliders: { ...sliderValues, ...{ background: 1000, terrainAlpha: 200 } },
-		duration: 1
+		sliders: {
+			background: { val: 255, t: 1 },
+			terrainAlpha: { val: 0.1, t: 1 }
+		}
 	},
 	{
 		name: 'pfOnGrid',
 		display: 'Pathfinder on Grid',
-		sliders: { ...sliderValues, ...{ background: 1000, terrainAlpha: 200, pathfinder: 1000 } },
-		duration: 1
+		sliders: {
+			background: { val: 255, t: 1 },
+			terrainAlpha: { val: 0.1, t: 1 },
+			pathfinder: { val: 1, t: 1 }
+		}
 	},
 	{
 		name: 'wandering',
 		display: 'Wandering',
-		sliders: { ...sliderValues, ...{ armLength: 200, background: 1000, wander: 1000, terrainRot: 1000, terrainAlpha: 1000 } },
-		duration: 1
+		sliders: {
+			armLength: { val: 1, t: 1 },
+			background: { val: 255, t: 1 },
+			wander: { val: 1, t: 1 },
+			terrainRot: { val: 1, t: 2 },
+			terrainAlpha: { val: 0.1, t: 2 },
+			pathfinder: { val: 0, t: 4 }
+		}
 	},
 	{
 		name: 'armOnBlack',
 		display: 'Arm on Black',
-		sliders: { ...sliderValues, ...{ armLength: 500, background: 1000, terrainRot: 1000 } },
-		duration: 3
+		sliders: {
+			armLength: { val: 2.5, t: 3 },
+			background: { val: 255, t: 3 },
+			terrainRot: { val: 1, t: 3 }
+		}
 	},
 	{
-		name: 'armOnVideo',
+		name: 'bodyOnVideo',
 		display: 'Arm on Video',
-		sliders: { ...sliderValues, ...{ armLength: 500, } },
-		duration: 8
+		sliders: {
+			armLength: { val: 2.5, t: 8 },
+			legLength: { val: 2, t: 8 },
+			background: { val: 0, t: 8 },
+		}
 	},
-	{
-		name: 'armAndLeg',
-		display: 'Arm and Leg',
-		sliders: { ...sliderValues, ...{ armLength: 500, legLength: 400 } },
-		duration: 1
-	},
-	{
-		name: 'all',
-		display: 'All',
-		sliders: { ...sliderValues, ...{ armLength: 500, legLength: 200, spineLength: 200 } },
-		duration: 1
-	},
-	{
-		name: 'keith',
-		display: 'Keith',
-		sliders: { ...sliderValues, ...{ armLength: 0, legLength: 20, spineLength: 300, background: 1000 } },
-		duration: 1
-	}
+	// {
+	// 	name: 'all',
+	// 	display: 'All',
+	// 	sliders: { ...sliderValues, ...{ armLength: 500, legLength: 200, spineLength: 200 } },
+	// 	duration: 1
+	// },
+	// {
+	// 	name: 'keith',
+	// 	display: 'Keith',
+	// 	sliders: { ...sliderValues, ...{ armLength: 0, legLength: 20, spineLength: 300, background: 1000 } },
+	// 	duration: 1
+	// }
 ];
-const sliderKeys = Object.keys(presets[0].sliders);
 
 var gui = new dat.gui.GUI();
 gui.remember(sliderValues);
 for (let key of Object.keys(sliderValues))
-	gui.add(sliderValues, key).min(0).max(1000).listen().onChange(function (value) {
+	gui.add(sliderValues, key).min(sliderProperties[key].min).max(sliderProperties[key].max).listen().onChange(function (value) {
 		let params = { sliderValues };
 		if (ws.readyState == WebSocket.OPEN) {
 			ws.send(JSON.stringify(params));
@@ -88,7 +111,18 @@ new Vue({
 });
 
 function easeTo(preset) {
-	TweenLite.to(sliderValues, preset.duration, { ...preset.sliders, ...{ ease: Power2.easeInOut, duration: preset.duration } });
+	for (const key in sliderProperties) {
+		if (preset.sliders[key] == undefined) {
+			let target = { ease: Power2.easeInOut };
+			target[key] = sliderProperties[key].default;
+			TweenLite.to(sliderValues, 1, target);
+		}
+		else {
+			let target = { ease: Power2.easeInOut };
+			target[key] = preset.sliders[key].val;
+			TweenLite.to(sliderValues, preset.sliders[key].t, target);
+		}
+	}
 	let count = 0;
 	let maxCount = preset.duration * 1000 / 10;
 	let interval = setInterval(function () {
@@ -101,13 +135,6 @@ function easeTo(preset) {
 			clearInterval(interval);
 		}
 	}, 10);
-}
-
-const sliders = [];
-for (const key of sliderKeys) {
-	let result = key.replace(/([A-Z])/g, " $1");
-	let display = result.charAt(0).toUpperCase() + result.slice(1);
-	sliders.push({ name: key, display: display })
 }
 
 ws.onopen = function (event) {

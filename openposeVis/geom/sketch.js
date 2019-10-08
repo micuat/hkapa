@@ -325,9 +325,9 @@ var s = function (p) {
         let pg = p.renderPg;
         let terrainAlpha = 255;
         let terrainConnect = 0;
-        terrainConnect = jsonUi.sliderValues.terrainAlpha / 1000.0 * 0.5;
-        if (jsonUi.sliderValues.terrainAlpha < 10) {
-            terrainAlpha *= jsonUi.sliderValues.terrainAlpha * 0.1;
+        terrainConnect = jsonUi.sliderValues.terrainAlpha;
+        if (jsonUi.sliderValues.terrainAlpha < 0.1) {
+            terrainAlpha *= p.map(jsonUi.sliderValues.terrainAlpha, 0, 0.1, 0, 1);
         }
         pg.strokeWeight(2);
         pg.stroke(255);
@@ -335,7 +335,7 @@ var s = function (p) {
         let gridMatrix = [];
         let terrain = {};
         for (let key in terrainBottom) {
-            let pl = jsonUi.sliderValues.terrainRot * 0.001;
+            let pl = jsonUi.sliderValues.terrainRot;
             let x = p.lerp(terrainWall[key][0], terrainBottom[key][0], pl);
             let y = p.lerp(terrainWall[key][1], terrainBottom[key][1], pl);
             terrain[key] = [x, y];
@@ -351,7 +351,7 @@ var s = function (p) {
                 let y = p.lerp(y0, y1, j / gridN);
                 let n = p.noise(t * 1 + y * 0.1, x * 0.1);
                 let amp = 0;
-                amp = jsonUi.sliderValues.terrainNoise * 0.1;
+                amp = jsonUi.sliderValues.terrainNoise;
                 y += -amp * EasingFunctions.easeInQuint(n);
                 gridMatrix[i][j] = { x: x, y: y };
             }
@@ -402,14 +402,14 @@ var s = function (p) {
         let showPoints = false;
         let staebeMaxLength = 5;
         let staebeLengths = [0, 0, 0];
-        staebeLengths[0] = jsonUi.sliderValues.armLength / 1000 * staebeMaxLength;
-        staebeLengths[1] = jsonUi.sliderValues.legLength / 1000 * staebeMaxLength;
-        staebeLengths[2] = jsonUi.sliderValues.spineLength / 1000 * staebeMaxLength;
+        staebeLengths[0] = jsonUi.sliderValues.armLength;
+        staebeLengths[1] = jsonUi.sliderValues.legLength;
+        staebeLengths[2] = jsonUi.sliderValues.spineLength;
         let lerping = 0.5;
 
         for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
-            smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliderValues.audioReactive / 1000.0);
+            smoothedAmps[i] = p.lerp(1, smoothedAmps[i], jsonUi.sliderValues.audioReactive);
         }
         let lineColor = { r: 255, g: 255, b: 255 };
 
@@ -421,7 +421,7 @@ var s = function (p) {
         pg.textSize(24)
         p.tracking();
 
-        pg.background(0, 0, 0, jsonUi.sliderValues.background / 1000.0 * 255);
+        pg.background(0, 0, 0, jsonUi.sliderValues.background);
 
         pg.strokeWeight(1);
         pg.noFill();
@@ -538,7 +538,7 @@ var s = function (p) {
                     let yp1 = pt.y1;
 
                     let particleLerp = 0;
-                    particleLerp = jsonUi.sliderValues.wander / 1000.0;
+                    particleLerp = jsonUi.sliderValues.wander;
 
                     let x2 = p.lerp(xt2, xp2, particleLerp);
                     let y2 = p.lerp(yt2, yp2, particleLerp);
