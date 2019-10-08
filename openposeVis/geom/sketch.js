@@ -538,7 +538,7 @@ var s = function (p) {
                     let yp1 = pt.y1;
 
                     let particleLerp = 0;
-                    particleLerp = jsonUi.sliders.wander / 1000.0;
+                    particleLerp = jsonUi.sliderValues.wander / 1000.0;
 
                     let x2 = p.lerp(xt2, xp2, particleLerp);
                     let y2 = p.lerp(yt2, yp2, particleLerp);
