@@ -438,13 +438,13 @@ var s = function (p) {
         pg.rect(0, 0, pg.width - 1, pg.height - 1);
 
         pg.pushMatrix();
-        pg.scale(p.width / 1280.0, p.height / 720.0);
+        pg.scale(p.width / 1920.0, p.height / 1080.0);
 
         p.drawTerrain(jsonUi, t);
 
         pathfinder.draw(jsonUi.sliderValues.pathfinder, pg, t);
 
-        pg.strokeWeight(4);
+        pg.strokeWeight(6);
         for (let i = 0; i < smoothedPoses.length; i++) {
             let smoothedPose = smoothedPoses[i];
             if (smoothedPose.disappearCount >= disappearMax) {
