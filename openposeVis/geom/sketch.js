@@ -34,7 +34,7 @@ function Pathfinder(p) {
     }
     this.cycle = 0.5;
     this.lastT = -100;
-    this.tick = 50 / 1.2;
+    this.tick = 50 / 1.2 * 1.5;
     this.rings = [];
     this.draw = function (pathfinderDraw, pg, t) {
         if (pathfinderDraw == 0) return;
@@ -86,7 +86,7 @@ function Pathfinder(p) {
         let r = 10;
         pg.pushStyle();
         pg.pushMatrix();
-        pg.translate(1280 / 2, 720 / 2);
+        pg.translate(1920 / 2, 1080 / 2);
 
         for (let i = this.rings.length - 1; i >= 0; i--) {
             if (this.rings[i].draw(pg, pathfinderDraw)) {
@@ -128,7 +128,7 @@ function Particle(p, pg) {
         this.toUpdate = false;
         this.pos.x += this.vel.x;
         this.pos.y += this.vel.y;
-        let w = 1280, h = 720;
+        let w = 1920, h = 1080;
         if (this.pos.x < -this.l) this.pos.x = w + this.l;
         if (this.pos.x > w + this.l) this.pos.x = - this.l;
         if (this.pos.y < -this.l) this.pos.y = h + this.l;
@@ -167,16 +167,16 @@ var s = function (p) {
     let particles = [];
 
     let terrainBottom = {
-        tl: [100, 550],
-        tr: [1180, 550],
-        bl: [-500, 690],
-        br: [1780, 690]
+        tl: [100*1.5, 550*1.5],
+        tr: [1180*1.5, 550*1.5],
+        bl: [-500*1.5, 690*1.5],
+        br: [1780*1.5, 690*1.5]
     }
     let terrainWall = {
-        tl: [640 - 250, 360 + 250],
-        tr: [640 + 250, 360 + 250],
-        bl: [640 - 250, 360 - 250],
-        br: [640 + 250, 360 - 250]
+        tl: [(640 - 250)*1.5, (360 + 250)*1.5],
+        tr: [(640 + 250)*1.5, (360 + 250)*1.5],
+        bl: [(640 - 250)*1.5, (360 - 250)*1.5],
+        br: [(640 + 250)*1.5, (360 - 250)*1.5]
     }
     let pathfinder = new Pathfinder(p);
 
@@ -518,7 +518,7 @@ var s = function (p) {
                         let dBy = yt3 - yt2;
                         let angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
                         angle = Math.abs(angle);
-                        l *= ofMap(angle, Math.PI * 0.25, Math.PI * 0.5, 0, 1.5, true);
+                        l *= ofMap(angle, Math.PI * 0.125, Math.PI * 0.5, 0, 1.5, true);
                     }
 
                     if (isNaN(xt0) || isNaN(yt0) || isNaN(xt1) || isNaN(yt1)) {
