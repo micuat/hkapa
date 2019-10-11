@@ -493,87 +493,64 @@ var s = function (p) {
                 return t;
             }
 
-            let medianPoints = [];
-            for (let j = 0; j < flippedIndex.length; j++) { // not so nice
-                let xs = [];
-                let ys = [];
-                for (let k = trace.length - 1; k >= 0; k--) {
-                    let x = trace[k][j].x;
-                    let y = trace[k][j].y;
-                    if (!isNaN(x) && !isNaN(y)) {
-                        xs.push(x);
-                        ys.push(y);
-                    }
-                    if (xs.length == 0) {
-                        medianPoints[j] = { x: NaN, y: NaN };
-                    }
-                    else {
-                        let sxs = xs.sort(function (a, b) { return a - b });
-                        let sys = ys.sort(function (a, b) { return a - b });
-                        let len = sxs.length;
-                        let x = sxs[Math.floor(len / 2)];
-                        let y = sys[Math.floor(len / 2)];
-
-                        medianPoints[j] = { x: x, y: y, alpha: len / trace.length };
-                    }
-                }
-            }
-
             for (let j = 0; j < pairs.length; j++) {
-                let staebeType = staebePairToType[j];
-                let l = staebeLengths[staebeType];
+                for (let k = trace.length - 1; k >= 0; k--) {
+                    let staebeType = staebePairToType[j];
+                    let l = staebeLengths[staebeType];
 
-                let i0 = pairs[j][0];
-                let i1 = pairs[j][1];
-                let xt0 = medianPoints[i0].x;
-                let yt0 = medianPoints[i0].y;
-                let xt1 = medianPoints[i1].x;
-                let yt1 = medianPoints[i1].y;
+                    let i0 = pairs[j][0];
+                    let i1 = pairs[j][1];
+                    let xt0 = trace[k][i0].x;
+                    let yt0 = trace[k][i0].y;
+                    let xt1 = trace[k][i1].x;
+                    let yt1 = trace[k][i1].y;
 
-                if (staebeType == 1) {
-                    let i2 = pairs[j][2];
-                    let i3 = pairs[j][3];
-                    let xt2 = medianPoints[i2].x;
-                    let yt2 = medianPoints[i2].y;
-                    let xt3 = medianPoints[i3].x;
-                    let yt3 = medianPoints[i3].y;
+                    if (staebeType == 1) {
+                        let i2 = pairs[j][2];
+                        let i3 = pairs[j][3];
+                        let xt2 = trace[k][i2].x;
+                        let yt2 = trace[k][i2].y;
+                        let xt3 = trace[k][i3].x;
+                        let yt3 = trace[k][i3].y;
 
-                    let dAx = xt1 - xt0;
-                    let dAy = yt1 - yt0;
-                    let dBx = xt3 - xt2;
-                    let dBy = yt3 - yt2;
-                    let angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
-                    angle = Math.abs(angle);
-                    l *= ofMap(angle, Math.PI * 0.125, Math.PI * 0.5, 0, 1.5, true);
+                        let dAx = xt1 - xt0;
+                        let dAy = yt1 - yt0;
+                        let dBx = xt3 - xt2;
+                        let dBy = yt3 - yt2;
+                        let angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
+                        angle = Math.abs(angle);
+                        l *= ofMap(angle, Math.PI * 0.125, Math.PI * 0.5, 0, 1.5, true);
+                    }
+
+                    let alpha = fadeIn * fadeOut * 255;
+                    if (l < 0.1) {
+                        alpha *= l * 10;
+                    }
+                    alpha *= k / trace.length;
+                    pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
+
+                    let xt2 = p.lerp(xt1, xt0, l);
+                    let yt2 = p.lerp(yt1, yt0, l);
+
+                    let particleIndex = Math.floor(smoothedPose.randomId * particles.length + j) % particles.length;
+                    let pt = particles[particleIndex];
+                    pt.update(l);
+                    let xp2 = pt.x0;
+                    let yp2 = pt.y0;
+                    let xp1 = pt.x1;
+                    let yp1 = pt.y1;
+
+                    let particleLerp = 0;
+                    particleLerp = ofMap(jsonUi.sliderValues.wander, particleIndex / particles.length * 0.5, particleIndex / particles.length * 0.5 + 0.5, 0, 1, true);
+                    particleLerp = EasingFunctions.easeInOutCubic(particleLerp);
+
+                    let x2 = p.lerp(xt2, xp2, particleLerp);
+                    let y2 = p.lerp(yt2, yp2, particleLerp);
+                    let x1 = p.lerp(xt1, xp1, particleLerp);
+                    let y1 = p.lerp(yt1, yp1, particleLerp);
+                    pg.line(x2, y2, x1, y1);
+                    break;
                 }
-
-                let alpha = fadeIn * fadeOut * 255;
-                if (l < 0.1) {
-                    alpha *= l * 10;
-                }
-                alpha *= Math.min(medianPoints[i0].alpha, medianPoints[i1].alpha);
-                pg.stroke(lineColor.r, lineColor.g, lineColor.b, alpha);
-
-                let xt2 = p.lerp(xt1, xt0, l);
-                let yt2 = p.lerp(yt1, yt0, l);
-
-                let particleIndex = Math.floor(smoothedPose.randomId * particles.length + j) % particles.length;
-                let pt = particles[particleIndex];
-                pt.update(l);
-                let xp2 = pt.x0;
-                let yp2 = pt.y0;
-                let xp1 = pt.x1;
-                let yp1 = pt.y1;
-
-                let particleLerp = 0;
-                particleLerp = ofMap(jsonUi.sliderValues.wander, particleIndex / particles.length * 0.5, particleIndex / particles.length * 0.5 + 0.5, 0, 1, true);
-                particleLerp = EasingFunctions.easeInOutCubic(particleLerp);
-
-                let x2 = p.lerp(xt2, xp2, particleLerp);
-                let y2 = p.lerp(yt2, yp2, particleLerp);
-                let x1 = p.lerp(xt1, xp1, particleLerp);
-                let y1 = p.lerp(yt1, yp1, particleLerp);
-                pg.line(x2, y2, x1, y1);
             }
             pg.popStyle();
         }
