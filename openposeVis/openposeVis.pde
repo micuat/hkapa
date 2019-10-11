@@ -86,9 +86,9 @@ public String jsonUiString = "{}";
  * init
  */
 void setup() {
-  //size(1280, 720);
-  fullScreen();
-  //fullScreen(2);
+  //size(1920, 1080);
+  //fullScreen();
+  fullScreen(2);
   frame = (JFrame)((PSurfaceAWT.SmoothCanvas) getSurface().getNative()).getFrame();
   frame.removeNotify();
   frame.setUndecorated(true);
@@ -434,7 +434,7 @@ void receive( byte[] data, String ip, int port ) {  // <-- extended handler
   data = subset(data, 0, data.length);
   jsonString = new String( data );
 
-  json = parseJSONObject("{"+jsonString+"}");
+  //json = parseJSONObject("{"+jsonString+"}");
 
   //if(saveCount < 6000) {
   //  String [] s = {jsonString};
