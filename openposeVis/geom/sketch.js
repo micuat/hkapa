@@ -181,7 +181,7 @@ var s = function (p) {
     let pathfinder = new Pathfinder(p);
 
     p.setup = function () {
-        p.frameRate(30);
+        p.frameRate(60);
 
         for (let i = 0; i < 100; i++) {
             particles.push(new Particle(p, p.renderPg));
@@ -410,7 +410,7 @@ var s = function (p) {
         staebeLengths[0] = jsonUi.sliderValues.armLength;
         staebeLengths[1] = jsonUi.sliderValues.legLength;
         staebeLengths[2] = jsonUi.sliderValues.spineLength;
-        let lerping = 0.5;
+        let lerping = 0.3;
 
         for (let i = 0; i < smoothedAmps.length; i++) {
             smoothedAmps[i] = p.lerp(smoothedAmps[i], p.fft.spectrum[i], 0.5);
